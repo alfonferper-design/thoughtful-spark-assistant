@@ -68,11 +68,16 @@ const euros = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR
 function PantallaFacturas() {
   const { data: facturas, isLoading } = useFacturas();
   const { data: proveedores } = useProveedores();
+  const { data: estadosPago } = useEstadosPagoFacturas();
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   const nombreProveedor = (id: string) =>
     (proveedores ?? []).find((p) => p.id === id)?.nombre_visible ?? "—";
+
+  // El estado de pago nunca se guarda (RB-017): se calcula en cada consulta.
+  const estadoPago = (id: string) =>
+    (estadosPago ?? []).find((e) => e.factura_id === id)?.estado_pago ?? null;
 
   async function refrescar() {
     await queryClient.invalidateQueries({ queryKey: ["facturas"] });
@@ -124,6 +129,7 @@ function PantallaFacturas() {
                 <TableHead>Número</TableHead>
                 <TableHead>Proveedor</TableHead>
                 <TableHead className="text-right">Total</TableHead>
+                <TableHead>Pago (familia)</TableHead>
                 <TableHead>Documental</TableHead>
                 <TableHead>Duplicado</TableHead>
                 <TableHead>Contable</TableHead>
@@ -157,6 +163,11 @@ function PantallaFacturas() {
                     <TableCell>{nombreProveedor(f.proveedor_id)}</TableCell>
                     <TableCell className="text-right font-mono">
                       {euros.format(Number(f.total))}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-[0.65rem]">
+                        {estadoPago(f.id) ?? "—"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Select
