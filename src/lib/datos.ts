@@ -7,6 +7,7 @@ import {
   obtenerActor,
   guardarActor as guardarActorFn,
 } from "@/lib/datos.functions";
+import { estadoPuerta } from "@/lib/gate.functions";
 
 export type Cuenta = {
   id: string;
