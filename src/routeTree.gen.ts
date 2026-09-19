@@ -10,11 +10,58 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuditoriaRouteImport } from './routes/auditoria'
+import { Route as BackupRouteImport } from './routes/backup'
+import { Route as CategoriasRouteImport } from './routes/categorias'
+import { Route as ComparativaRouteImport } from './routes/comparativa'
+import { Route as CompromisosRouteImport } from './routes/compromisos'
+import { Route as ConciliacionesRouteImport } from './routes/conciliaciones'
 import { Route as CuentasRouteImport } from './routes/cuentas'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
+import { Route as FacturasRouteImport } from './routes/facturas'
+import { Route as FichaRouteImport } from './routes/ficha'
+import { Route as InformesRouteImport } from './routes/informes'
+import { Route as MovimientosRouteImport } from './routes/movimientos'
+import { Route as ProveedoresRouteImport } from './routes/proveedores'
+import { Route as SnapshotsRouteImport } from './routes/snapshots'
+import { Route as TransferenciasRouteImport } from './routes/transferencias'
+import { Route as ValidacionRouteImport } from './routes/validacion'
+import { Route as VencimientosRouteImport } from './routes/vencimientos'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditoriaRoute = AuditoriaRouteImport.update({
+  id: '/auditoria',
+  path: '/auditoria',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BackupRoute = BackupRouteImport.update({
+  id: '/backup',
+  path: '/backup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoriasRoute = CategoriasRouteImport.update({
+  id: '/categorias',
+  path: '/categorias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComparativaRoute = ComparativaRouteImport.update({
+  id: '/comparativa',
+  path: '/comparativa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompromisosRoute = CompromisosRouteImport.update({
+  id: '/compromisos',
+  path: '/compromisos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConciliacionesRoute = ConciliacionesRouteImport.update({
+  id: '/conciliaciones',
+  path: '/conciliaciones',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CuentasRoute = CuentasRouteImport.update({
@@ -22,31 +69,212 @@ const CuentasRoute = CuentasRouteImport.update({
   path: '/cuentas',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiagnosticoRoute = DiagnosticoRouteImport.update({
+  id: '/diagnostico',
+  path: '/diagnostico',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FacturasRoute = FacturasRouteImport.update({
+  id: '/facturas',
+  path: '/facturas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FichaRoute = FichaRouteImport.update({
+  id: '/ficha',
+  path: '/ficha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InformesRoute = InformesRouteImport.update({
+  id: '/informes',
+  path: '/informes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MovimientosRoute = MovimientosRouteImport.update({
+  id: '/movimientos',
+  path: '/movimientos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProveedoresRoute = ProveedoresRouteImport.update({
+  id: '/proveedores',
+  path: '/proveedores',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SnapshotsRoute = SnapshotsRouteImport.update({
+  id: '/snapshots',
+  path: '/snapshots',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransferenciasRoute = TransferenciasRouteImport.update({
+  id: '/transferencias',
+  path: '/transferencias',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ValidacionRoute = ValidacionRouteImport.update({
+  id: '/validacion',
+  path: '/validacion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VencimientosRoute = VencimientosRouteImport.update({
+  id: '/vencimientos',
+  path: '/vencimientos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auditoria': typeof AuditoriaRoute
+  '/backup': typeof BackupRoute
+  '/categorias': typeof CategoriasRoute
+  '/comparativa': typeof ComparativaRoute
+  '/compromisos': typeof CompromisosRoute
+  '/conciliaciones': typeof ConciliacionesRoute
   '/cuentas': typeof CuentasRoute
+  '/dashboard': typeof DashboardRoute
+  '/diagnostico': typeof DiagnosticoRoute
+  '/facturas': typeof FacturasRoute
+  '/ficha': typeof FichaRoute
+  '/informes': typeof InformesRoute
+  '/movimientos': typeof MovimientosRoute
+  '/proveedores': typeof ProveedoresRoute
+  '/snapshots': typeof SnapshotsRoute
+  '/transferencias': typeof TransferenciasRoute
+  '/validacion': typeof ValidacionRoute
+  '/vencimientos': typeof VencimientosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auditoria': typeof AuditoriaRoute
+  '/backup': typeof BackupRoute
+  '/categorias': typeof CategoriasRoute
+  '/comparativa': typeof ComparativaRoute
+  '/compromisos': typeof CompromisosRoute
+  '/conciliaciones': typeof ConciliacionesRoute
   '/cuentas': typeof CuentasRoute
+  '/dashboard': typeof DashboardRoute
+  '/diagnostico': typeof DiagnosticoRoute
+  '/facturas': typeof FacturasRoute
+  '/ficha': typeof FichaRoute
+  '/informes': typeof InformesRoute
+  '/movimientos': typeof MovimientosRoute
+  '/proveedores': typeof ProveedoresRoute
+  '/snapshots': typeof SnapshotsRoute
+  '/transferencias': typeof TransferenciasRoute
+  '/validacion': typeof ValidacionRoute
+  '/vencimientos': typeof VencimientosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auditoria': typeof AuditoriaRoute
+  '/backup': typeof BackupRoute
+  '/categorias': typeof CategoriasRoute
+  '/comparativa': typeof ComparativaRoute
+  '/compromisos': typeof CompromisosRoute
+  '/conciliaciones': typeof ConciliacionesRoute
   '/cuentas': typeof CuentasRoute
+  '/dashboard': typeof DashboardRoute
+  '/diagnostico': typeof DiagnosticoRoute
+  '/facturas': typeof FacturasRoute
+  '/ficha': typeof FichaRoute
+  '/informes': typeof InformesRoute
+  '/movimientos': typeof MovimientosRoute
+  '/proveedores': typeof ProveedoresRoute
+  '/snapshots': typeof SnapshotsRoute
+  '/transferencias': typeof TransferenciasRoute
+  '/validacion': typeof ValidacionRoute
+  '/vencimientos': typeof VencimientosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/cuentas'
+  fullPaths:
+    | '/'
+    | '/auditoria'
+    | '/backup'
+    | '/categorias'
+    | '/comparativa'
+    | '/compromisos'
+    | '/conciliaciones'
+    | '/cuentas'
+    | '/dashboard'
+    | '/diagnostico'
+    | '/facturas'
+    | '/ficha'
+    | '/informes'
+    | '/movimientos'
+    | '/proveedores'
+    | '/snapshots'
+    | '/transferencias'
+    | '/validacion'
+    | '/vencimientos'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/cuentas'
-  id: '__root__' | '/' | '/cuentas'
+  to:
+    | '/'
+    | '/auditoria'
+    | '/backup'
+    | '/categorias'
+    | '/comparativa'
+    | '/compromisos'
+    | '/conciliaciones'
+    | '/cuentas'
+    | '/dashboard'
+    | '/diagnostico'
+    | '/facturas'
+    | '/ficha'
+    | '/informes'
+    | '/movimientos'
+    | '/proveedores'
+    | '/snapshots'
+    | '/transferencias'
+    | '/validacion'
+    | '/vencimientos'
+  id:
+    | '__root__'
+    | '/'
+    | '/auditoria'
+    | '/backup'
+    | '/categorias'
+    | '/comparativa'
+    | '/compromisos'
+    | '/conciliaciones'
+    | '/cuentas'
+    | '/dashboard'
+    | '/diagnostico'
+    | '/facturas'
+    | '/ficha'
+    | '/informes'
+    | '/movimientos'
+    | '/proveedores'
+    | '/snapshots'
+    | '/transferencias'
+    | '/validacion'
+    | '/vencimientos'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuditoriaRoute: typeof AuditoriaRoute
+  BackupRoute: typeof BackupRoute
+  CategoriasRoute: typeof CategoriasRoute
+  ComparativaRoute: typeof ComparativaRoute
+  CompromisosRoute: typeof CompromisosRoute
+  ConciliacionesRoute: typeof ConciliacionesRoute
   CuentasRoute: typeof CuentasRoute
+  DashboardRoute: typeof DashboardRoute
+  DiagnosticoRoute: typeof DiagnosticoRoute
+  FacturasRoute: typeof FacturasRoute
+  FichaRoute: typeof FichaRoute
+  InformesRoute: typeof InformesRoute
+  MovimientosRoute: typeof MovimientosRoute
+  ProveedoresRoute: typeof ProveedoresRoute
+  SnapshotsRoute: typeof SnapshotsRoute
+  TransferenciasRoute: typeof TransferenciasRoute
+  ValidacionRoute: typeof ValidacionRoute
+  VencimientosRoute: typeof VencimientosRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +286,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auditoria': {
+      id: '/auditoria'
+      path: '/auditoria'
+      fullPath: '/auditoria'
+      preLoaderRoute: typeof AuditoriaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/backup': {
+      id: '/backup'
+      path: '/backup'
+      fullPath: '/backup'
+      preLoaderRoute: typeof BackupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categorias': {
+      id: '/categorias'
+      path: '/categorias'
+      fullPath: '/categorias'
+      preLoaderRoute: typeof CategoriasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/comparativa': {
+      id: '/comparativa'
+      path: '/comparativa'
+      fullPath: '/comparativa'
+      preLoaderRoute: typeof ComparativaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compromisos': {
+      id: '/compromisos'
+      path: '/compromisos'
+      fullPath: '/compromisos'
+      preLoaderRoute: typeof CompromisosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conciliaciones': {
+      id: '/conciliaciones'
+      path: '/conciliaciones'
+      fullPath: '/conciliaciones'
+      preLoaderRoute: typeof ConciliacionesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/cuentas': {
       id: '/cuentas'
       path: '/cuentas'
@@ -65,12 +335,106 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CuentasRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/diagnostico': {
+      id: '/diagnostico'
+      path: '/diagnostico'
+      fullPath: '/diagnostico'
+      preLoaderRoute: typeof DiagnosticoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/facturas': {
+      id: '/facturas'
+      path: '/facturas'
+      fullPath: '/facturas'
+      preLoaderRoute: typeof FacturasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ficha': {
+      id: '/ficha'
+      path: '/ficha'
+      fullPath: '/ficha'
+      preLoaderRoute: typeof FichaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/informes': {
+      id: '/informes'
+      path: '/informes'
+      fullPath: '/informes'
+      preLoaderRoute: typeof InformesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/movimientos': {
+      id: '/movimientos'
+      path: '/movimientos'
+      fullPath: '/movimientos'
+      preLoaderRoute: typeof MovimientosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/proveedores': {
+      id: '/proveedores'
+      path: '/proveedores'
+      fullPath: '/proveedores'
+      preLoaderRoute: typeof ProveedoresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/snapshots': {
+      id: '/snapshots'
+      path: '/snapshots'
+      fullPath: '/snapshots'
+      preLoaderRoute: typeof SnapshotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transferencias': {
+      id: '/transferencias'
+      path: '/transferencias'
+      fullPath: '/transferencias'
+      preLoaderRoute: typeof TransferenciasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/validacion': {
+      id: '/validacion'
+      path: '/validacion'
+      fullPath: '/validacion'
+      preLoaderRoute: typeof ValidacionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/vencimientos': {
+      id: '/vencimientos'
+      path: '/vencimientos'
+      fullPath: '/vencimientos'
+      preLoaderRoute: typeof VencimientosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuditoriaRoute: AuditoriaRoute,
+  BackupRoute: BackupRoute,
+  CategoriasRoute: CategoriasRoute,
+  ComparativaRoute: ComparativaRoute,
+  CompromisosRoute: CompromisosRoute,
+  ConciliacionesRoute: ConciliacionesRoute,
   CuentasRoute: CuentasRoute,
+  DashboardRoute: DashboardRoute,
+  DiagnosticoRoute: DiagnosticoRoute,
+  FacturasRoute: FacturasRoute,
+  FichaRoute: FichaRoute,
+  InformesRoute: InformesRoute,
+  MovimientosRoute: MovimientosRoute,
+  ProveedoresRoute: ProveedoresRoute,
+  SnapshotsRoute: SnapshotsRoute,
+  TransferenciasRoute: TransferenciasRoute,
+  ValidacionRoute: ValidacionRoute,
+  VencimientosRoute: VencimientosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
