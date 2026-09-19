@@ -122,6 +122,7 @@ function PantallaFacturas() {
                 <TableHead>Duplicado</TableHead>
                 <TableHead>Contable</TableHead>
                 <TableHead>Entorno</TableHead>
+                <TableHead className="text-right">Ficha</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
