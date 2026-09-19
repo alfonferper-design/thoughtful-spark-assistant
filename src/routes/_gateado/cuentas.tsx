@@ -23,9 +23,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useActor, useCuentas, type Cuenta } from "@/lib/datos";
+import { useActor, useCuentas, useSaldosInternos, type Cuenta } from "@/lib/datos";
 import { crearCuenta } from "@/lib/datos.functions";
 import { formatoEuros } from "@/lib/secciones";
+import { redondearEuros } from "@/lib/dinero";
 
 export const Route = createFileRoute("/_gateado/cuentas")({
   head: () => ({
@@ -50,8 +51,11 @@ const TIPOS: Cuenta["tipo"][] = ["Cuenta corriente", "Línea de crédito", "Cuen
 
 function PantallaCuentas() {
   const { data: cuentas, isLoading } = useCuentas();
+  const { data: saldos } = useSaldosInternos();
   const { actor } = useActor();
   const queryClient = useQueryClient();
+  const saldoInternoDe = (id: string) =>
+    (saldos ?? []).find((s) => s.cuenta_id === id)?.saldo_interno ?? null;
   const [guardando, setGuardando] = useState(false);
   const [nombre, setNombre] = useState("");
   const [tipo, setTipo] = useState<Cuenta["tipo"]>("Cuenta corriente");
