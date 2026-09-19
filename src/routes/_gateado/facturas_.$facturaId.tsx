@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
 import { PanelDocumentoFactura } from "@/components/PanelDocumentoFactura";
 import { PanelVencimientosFactura } from "@/components/PanelVencimientosFactura";
+import { PanelPagosFactura } from "@/components/PanelPagosFactura";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -272,6 +273,10 @@ function PantallaFicha() {
             fechaEmision={factura.fecha_emision}
             fechaVencimientoCabecera={factura.fecha_vencimiento}
           />
+
+          <PanelPagosFactura facturaId={facturaId} actor={actor} />
+
+
 
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3">

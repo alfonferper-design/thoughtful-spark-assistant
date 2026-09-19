@@ -20,7 +20,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useActor, useFacturas, useProveedores, type Factura } from "@/lib/datos";
+import {
+  useActor,
+  useEstadosPagoFacturas,
+  useFacturas,
+  useProveedores,
+  type Factura,
+} from "@/lib/datos";
 import {
   cambiarEstadoContableFactura,
   cambiarEstadoDocumentalFactura,
@@ -62,14 +68,20 @@ const euros = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR
 function PantallaFacturas() {
   const { data: facturas, isLoading } = useFacturas();
   const { data: proveedores } = useProveedores();
+  const { data: estadosPago } = useEstadosPagoFacturas();
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
   const nombreProveedor = (id: string) =>
     (proveedores ?? []).find((p) => p.id === id)?.nombre_visible ?? "—";
 
+  // El estado de pago nunca se guarda (RB-017): se calcula en cada consulta.
+  const estadoPago = (id: string) =>
+    (estadosPago ?? []).find((e) => e.factura_id === id)?.estado_pago ?? null;
+
   async function refrescar() {
     await queryClient.invalidateQueries({ queryKey: ["facturas"] });
+    await queryClient.invalidateQueries({ queryKey: ["estados-pago-facturas"] });
     await queryClient.invalidateQueries({ queryKey: ["auditoria"] });
   }
 
@@ -118,6 +130,7 @@ function PantallaFacturas() {
                 <TableHead>Número</TableHead>
                 <TableHead>Proveedor</TableHead>
                 <TableHead className="text-right">Total</TableHead>
+                <TableHead>Pago (familia)</TableHead>
                 <TableHead>Documental</TableHead>
                 <TableHead>Duplicado</TableHead>
                 <TableHead>Contable</TableHead>
@@ -128,14 +141,14 @@ function PantallaFacturas() {
             <TableBody>
               {isLoading && (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
                     Cargando…
                   </TableCell>
                 </TableRow>
               )}
               {!isLoading && (facturas ?? []).length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
                     Todavía no hay facturas registradas.
                   </TableCell>
                 </TableRow>
@@ -151,6 +164,11 @@ function PantallaFacturas() {
                     <TableCell>{nombreProveedor(f.proveedor_id)}</TableCell>
                     <TableCell className="text-right font-mono">
                       {euros.format(Number(f.total))}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="text-[0.65rem]">
+                        {estadoPago(f.id) ?? "—"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Select

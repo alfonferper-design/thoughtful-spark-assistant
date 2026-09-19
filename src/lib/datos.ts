@@ -16,6 +16,11 @@ import {
   saldosInternosCuentas,
   listarVencimientos,
   listarVencimientosFactura,
+  obtenerPosicionPagoFactura,
+  estadosPagoFacturas,
+  detallesVencimientosFactura,
+  movimientosDisponibles,
+  listarConciliaciones,
 } from "@/lib/datos.functions";
 import { estadoPuerta } from "@/lib/gate.functions";
 import type {
@@ -322,6 +327,59 @@ export function useVencimientosFactura(facturaId: string) {
     queryKey: ["vencimientos-factura", facturaId],
     queryFn: () => listarVencimientosFactura({ data: { facturaId } }),
     enabled: abierta && !!facturaId,
+    retry: false,
+  });
+}
+
+// ---------- Motor de pagos (Parte 5) ----------
+// Ninguna de estas cifras se guarda: se recalculan siempre en el momento.
+
+export function usePosicionPagoFactura(facturaId: string) {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["posicion-pago", facturaId],
+    queryFn: () => obtenerPosicionPagoFactura({ data: { facturaId } }),
+    enabled: abierta && !!facturaId,
+    retry: false,
+  });
+}
+
+export function useEstadosPagoFacturas() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["estados-pago-facturas"],
+    queryFn: () => estadosPagoFacturas(),
+    enabled: abierta,
+    retry: false,
+  });
+}
+
+export function useDetallesVencimientosFactura(facturaId: string) {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["detalles-vencimientos", facturaId],
+    queryFn: () => detallesVencimientosFactura({ data: { facturaId } }),
+    enabled: abierta && !!facturaId,
+    retry: false,
+  });
+}
+
+export function useMovimientosDisponibles() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["movimientos-disponibles"],
+    queryFn: () => movimientosDisponibles(),
+    enabled: abierta,
+    retry: false,
+  });
+}
+
+export function useConciliaciones() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["conciliaciones"],
+    queryFn: () => listarConciliaciones(),
+    enabled: abierta,
     retry: false,
   });
 }

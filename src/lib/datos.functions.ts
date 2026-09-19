@@ -1297,3 +1297,220 @@ export const crearVencimientoFactura = createServerFn({ method: "POST" })
     });
   });
 
+// ---------- Motor de pagos y Conciliación (Partes 2.11 y 5) ----------
+
+/**
+ * Contexto en memoria del motor de pagos: facturas, vencimientos, movimientos y
+ * el detalle de todas las conciliaciones. Todas las funciones de la Parte 5 leen
+ * de aquí, así ninguna pantalla recalcula nada por su cuenta.
+ */
+async function contextoPagos(admin: Admin) {
+  const [facturas, vencimientos, movimientos, detalles] = await Promise.all([
+    admin
+      .from("facturas")
+      .select("id, total, tipo_factura, factura_relacionada_id, estado_documental, entorno"),
+    admin
+      .from("vencimientos")
+      .select(
+        "id, factura_id, compromiso_fijo_id, fecha, importe, estado, tipo, tipo_vencimiento, entorno",
+      ),
+    admin.from("movimientos").select("id, importe, entorno"),
+    admin.from("conciliacion_detalle").select("vencimiento_id, movimiento_id, importe_aplicado"),
+  ]);
+  if (facturas.error) throw new Error(facturas.error.message);
+  if (vencimientos.error) throw new Error(vencimientos.error.message);
+  if (movimientos.error) throw new Error(movimientos.error.message);
+  if (detalles.error) throw new Error(detalles.error.message);
+
+  return {
+    facturas: (facturas.data ?? []).map((f) => ({ ...f, total: Number(f.total) })),
+    vencimientos: (vencimientos.data ?? []).map((v) => ({ ...v, importe: Number(v.importe) })),
+    movimientos: (movimientos.data ?? []).map((m) => ({ ...m, importe: Number(m.importe) })),
+    detalles: (detalles.data ?? []).map((d) => ({
+      ...d,
+      importe_aplicado: Number(d.importe_aplicado),
+    })),
+  };
+}
+
+/** F-31 · posición de pago de la familia documental de una factura. */
+export const obtenerPosicionPagoFactura = createServerFn({ method: "GET" })
+  .inputValidator((data) => z.object({ facturaId: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    const { posicionPagoFactura, estadoPagoFamiliaFactura } = await import("./conciliacion");
+    const ctx = await contextoPagos(admin);
+    return {
+      posicion: posicionPagoFactura(data.facturaId, ctx),
+      estadoPago: estadoPagoFamiliaFactura(data.facturaId, ctx),
+    };
+  });
+
+/**
+ * F-32 por fila del listado de facturas. El estado de pago nunca se guarda
+ * (RB-017): se calcula siempre en el momento, para todas las facturas a la vez.
+ */
+export const estadosPagoFacturas = createServerFn({ method: "GET" }).handler(async () => {
+  const admin = await adminAutorizado();
+  const { estadoPagoFamiliaFactura } = await import("./conciliacion");
+  const ctx = await contextoPagos(admin);
+  return ctx.facturas.map((f) => ({
+    factura_id: f.id,
+    estado_pago: estadoPagoFamiliaFactura(f.id, ctx),
+  }));
+});
+
+/** F-30 · detalleVencimiento() de todos los vencimientos de una factura. */
+export const detallesVencimientosFactura = createServerFn({ method: "GET" })
+  .inputValidator((data) => z.object({ facturaId: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    const { detalleVencimiento, vencimientosDeFactura } = await import("./conciliacion");
+    const ctx = await contextoPagos(admin);
+    return vencimientosDeFactura(data.facturaId, ctx)
+      .map((v) => detalleVencimiento(v.id, ctx))
+      .filter((d): d is NonNullable<typeof d> => d !== null);
+  });
+
+/** F-28/F-29 · movimientos con importe todavía disponible para conciliar. */
+export const movimientosDisponibles = createServerFn({ method: "GET" }).handler(async () => {
+  const admin = await adminAutorizado();
+  const { importeDisponibleMovimiento, movimientoYaAplicado } = await import("./conciliacion");
+  const { TOLERANCIA_REDONDEO_EUR } = await import("./dinero");
+  const ctx = await contextoPagos(admin);
+  const { data: filas, error } = await admin
+    .from("movimientos")
+    .select("id, fecha, importe, tipo, estado, cuenta_id, proveedor_id, entorno")
+    .order("fecha", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (filas ?? [])
+    .map((m) => ({
+      id: m.id,
+      fecha: m.fecha,
+      importe: Number(m.importe),
+      tipo: m.tipo,
+      estado: m.estado,
+      cuenta_id: m.cuenta_id,
+      proveedor_id: m.proveedor_id,
+      entorno: m.entorno,
+      ya_aplicado: movimientoYaAplicado(m.id, ctx),
+      disponible: importeDisponibleMovimiento(m.id, ctx),
+    }))
+    .filter((m) => m.disponible > TOLERANCIA_REDONDEO_EUR);
+});
+
+/** Listado de solo lectura de las conciliaciones registradas, con su detalle. */
+export const listarConciliaciones = createServerFn({ method: "GET" }).handler(async () => {
+  const admin = await adminAutorizado();
+  const [conciliaciones, detalles] = await Promise.all([
+    admin.from("conciliaciones").select("*").order("created_at", { ascending: false }),
+    admin.from("conciliacion_detalle").select("*"),
+  ]);
+  if (conciliaciones.error) throw new Error(conciliaciones.error.message);
+  if (detalles.error) throw new Error(detalles.error.message);
+  const filas = detalles.data ?? [];
+  return (conciliaciones.data ?? []).map((c) => ({
+    ...c,
+    nivel_confianza: c.nivel_confianza === null ? null : Number(c.nivel_confianza),
+    detalle: filas
+      .filter((d) => d.conciliacion_id === c.id)
+      .map((d) => ({ ...d, importe_aplicado: Number(d.importe_aplicado) })),
+  }));
+});
+
+const entradaConciliacionSchema = z.object({
+  vencimientoId: z.string().uuid(),
+  movimientoId: z.string().uuid(),
+  importeAplicado: z.number(),
+});
+
+/** 5.4 · validarConciliacion — comprobación previa, no escribe nada. */
+export const validarConciliacion = createServerFn({ method: "POST" })
+  .inputValidator((data) => entradaConciliacionSchema.parse(data))
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    const { validarConciliacion: validar } = await import("./conciliacion");
+    const ctx = await contextoPagos(admin);
+    return validar(data, ctx);
+  });
+
+/**
+ * 5.5 · registrarConciliacion — ÚNICA vía de escritura de una conciliación.
+ * Validaciones en el orden exacto del documento:
+ *   a) validarConciliacion(): errores de entrada abortan.
+ *   b) Regla 7: tipo ≠ 'Exacta' exige confirmado_por.
+ *   c) Exceso sin autorización explícita: rechazo con el detalle de cada lado.
+ *   d) Exceso autorizado sin motivo: rechazo.
+ * Los efectos (conciliación + detalle + estado del vencimiento + estado del
+ * movimiento + auditoría) se aplican dentro de una única transacción en la
+ * función de base de datos registrar_conciliacion(), que vuelve a comprobar lo
+ * mismo con las filas bloqueadas: o se confirma todo, o no se confirma nada.
+ */
+export const registrarConciliacion = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    entradaConciliacionSchema
+      .extend({
+        tipo: z.enum(["Exacta", "Parcial", "Agrupada"]),
+        nivelConfianza: z.number().min(0).max(100).nullable(),
+        confirmadoPor: z.string().trim().max(200).nullable(),
+        autorizarExceso: z.boolean(),
+        motivoExceso: z.string().trim().max(500).nullable(),
+        actor: actorSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    const c = await import("./conciliacion");
+    const ctx = await contextoPagos(admin);
+
+    // a) Errores de entrada.
+    const validacion = c.validarConciliacion(
+      {
+        vencimientoId: data.vencimientoId,
+        movimientoId: data.movimientoId,
+        importeAplicado: data.importeAplicado,
+      },
+      ctx,
+    );
+    if (validacion.errores.length > 0) throw new Error(validacion.errores.join(" "));
+
+    // b) Regla 7.
+    if (data.tipo !== "Exacta" && !data.confirmadoPor) throw new Error(c.MENSAJE_REGLA_7);
+
+    const hayExceso = validacion.excedeVencimiento || validacion.excedeMovimiento;
+
+    // c) Exceso no autorizado.
+    if (hayExceso && !data.autorizarExceso) {
+      throw new Error(c.mensajeExcesoConciliacion(validacion));
+    }
+
+    // d) Exceso autorizado sin motivo.
+    if (hayExceso && !data.motivoExceso) throw new Error(c.MENSAJE_MOTIVO_EXCESO);
+
+    // Los parámetros opcionales admiten null en la función SQL; los tipos
+    // generados los declaran no nulos, de ahí el ajuste de tipo.
+    const { data: resultado, error } = await admin.rpc("registrar_conciliacion", {
+      p_vencimiento_id: data.vencimientoId,
+      p_movimiento_id: data.movimientoId,
+      p_importe_aplicado: data.importeAplicado,
+      p_tipo: data.tipo,
+      p_nivel_confianza: data.nivelConfianza,
+      p_confirmado_por: data.confirmadoPor,
+      p_autorizar_exceso: data.autorizarExceso,
+      p_motivo_exceso: data.motivoExceso,
+      p_actor: data.actor,
+    } as never);
+    if (error) throw new Error(error.message);
+    return resultado as {
+      conciliacion_id: string;
+      detalle_id: string;
+      importe_aplicado: number;
+      hubo_exceso: boolean;
+      vencimiento_marcado_pagado: boolean;
+      movimiento_conciliado: boolean;
+      pendiente_vencimiento_tras: number;
+      disponible_movimiento_tras: number;
+    };
+  });
+
