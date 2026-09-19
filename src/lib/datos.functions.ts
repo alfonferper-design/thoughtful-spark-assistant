@@ -1488,6 +1488,8 @@ export const registrarConciliacion = createServerFn({ method: "POST" })
     // d) Exceso autorizado sin motivo.
     if (hayExceso && !data.motivoExceso) throw new Error(c.MENSAJE_MOTIVO_EXCESO);
 
+    // Los parámetros opcionales admiten null en la función SQL; los tipos
+    // generados los declaran no nulos, de ahí el ajuste de tipo.
     const { data: resultado, error } = await admin.rpc("registrar_conciliacion", {
       p_vencimiento_id: data.vencimientoId,
       p_movimiento_id: data.movimientoId,
@@ -1498,7 +1500,7 @@ export const registrarConciliacion = createServerFn({ method: "POST" })
       p_autorizar_exceso: data.autorizarExceso,
       p_motivo_exceso: data.motivoExceso,
       p_actor: data.actor,
-    });
+    } as never);
     if (error) throw new Error(error.message);
     return resultado as {
       conciliacion_id: string;
