@@ -7,6 +7,7 @@ import {
   obtenerActor,
   guardarActor as guardarActorFn,
 } from "@/lib/datos.functions";
+import { estadoPuerta } from "@/lib/gate.functions";
 
 export type Cuenta = {
   id: string;
@@ -56,27 +57,43 @@ export type RegistroAuditoria = {
 };
 
 // Todas las consultas llaman a funciones de servidor que exigen la sesión
-// desbloqueada con la clave de la aplicación.
+// desbloqueada con la clave de la aplicación. Por eso no se lanzan hasta que
+// la puerta está confirmada como abierta en el navegador.
+
+export function usePuertaAbierta() {
+  const { data } = useQuery({
+    queryKey: ["puerta"],
+    queryFn: () => estadoPuerta(),
+    staleTime: 30_000,
+    retry: false,
+  });
+  return data?.desbloqueado === true;
+}
 
 export function useCuentas() {
-  return useQuery({ queryKey: ["cuentas"], queryFn: () => listarCuentas() });
+  const abierta = usePuertaAbierta();
+  return useQuery({ queryKey: ["cuentas"], queryFn: () => listarCuentas(), enabled: abierta, retry: false });
 }
 
 export function useCategorias() {
-  return useQuery({ queryKey: ["categorias"], queryFn: () => listarCategorias() });
+  const abierta = usePuertaAbierta();
+  return useQuery({ queryKey: ["categorias"], queryFn: () => listarCategorias(), enabled: abierta, retry: false });
 }
 
 export function useProveedores() {
-  return useQuery({ queryKey: ["proveedores"], queryFn: () => listarProveedores() });
+  const abierta = usePuertaAbierta();
+  return useQuery({ queryKey: ["proveedores"], queryFn: () => listarProveedores(), enabled: abierta, retry: false });
 }
 
 export function useAuditoria() {
-  return useQuery({ queryKey: ["auditoria"], queryFn: () => listarAuditoria() });
+  const abierta = usePuertaAbierta();
+  return useQuery({ queryKey: ["auditoria"], queryFn: () => listarAuditoria(), enabled: abierta, retry: false });
 }
 
 export function useActor() {
   const queryClient = useQueryClient();
-  const query = useQuery({ queryKey: ["actor"], queryFn: () => obtenerActor() });
+  const abierta = usePuertaAbierta();
+  const query = useQuery({ queryKey: ["actor"], queryFn: () => obtenerActor(), enabled: abierta, retry: false });
 
   async function guardarActor(nombre: string) {
     await guardarActorFn({ data: { nombre } });
