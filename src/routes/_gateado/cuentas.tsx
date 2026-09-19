@@ -27,7 +27,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useActor, useCuentas, registrarAuditoria, type Cuenta } from "@/lib/datos";
 import { formatoEuros } from "@/lib/secciones";
 
-export const Route = createFileRoute("/cuentas")({
+export const Route = createFileRoute("/_gateado/cuentas")({
   head: () => ({
     meta: [
       { title: "Cuentas bancarias · Farmatrack" },

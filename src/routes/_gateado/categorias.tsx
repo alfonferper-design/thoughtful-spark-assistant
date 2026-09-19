@@ -18,7 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useActor, useCategorias, registrarAuditoria, type Categoria } from "@/lib/datos";
 
-export const Route = createFileRoute("/categorias")({
+export const Route = createFileRoute("/_gateado/categorias")({
   head: () => ({
     meta: [
       { title: "Categorías · Farmatrack" },

@@ -9,209 +9,206 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuditoriaRouteImport } from './routes/auditoria'
-import { Route as BackupRouteImport } from './routes/backup'
-import { Route as CategoriasRouteImport } from './routes/categorias'
-import { Route as ComparativaRouteImport } from './routes/comparativa'
-import { Route as CompromisosRouteImport } from './routes/compromisos'
-import { Route as ConciliacionesRouteImport } from './routes/conciliaciones'
-import { Route as CuentasRouteImport } from './routes/cuentas'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
-import { Route as FacturasRouteImport } from './routes/facturas'
-import { Route as FichaRouteImport } from './routes/ficha'
-import { Route as InformesRouteImport } from './routes/informes'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as MovimientosRouteImport } from './routes/movimientos'
-import { Route as ProveedoresRouteImport } from './routes/proveedores'
-import { Route as SnapshotsRouteImport } from './routes/snapshots'
-import { Route as TransferenciasRouteImport } from './routes/transferencias'
-import { Route as ValidacionRouteImport } from './routes/validacion'
-import { Route as VencimientosRouteImport } from './routes/vencimientos'
-import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as GateadoRouteRouteImport } from './routes/_gateado/route'
+import { Route as UnlockRouteImport } from './routes/unlock'
+import { Route as GateadoIndexRouteImport } from './routes/_gateado/index'
+import { Route as GateadoAuditoriaRouteImport } from './routes/_gateado/auditoria'
+import { Route as GateadoBackupRouteImport } from './routes/_gateado/backup'
+import { Route as GateadoCategoriasRouteImport } from './routes/_gateado/categorias'
+import { Route as GateadoComparativaRouteImport } from './routes/_gateado/comparativa'
+import { Route as GateadoCompromisosRouteImport } from './routes/_gateado/compromisos'
+import { Route as GateadoConciliacionesRouteImport } from './routes/_gateado/conciliaciones'
+import { Route as GateadoCuentasRouteImport } from './routes/_gateado/cuentas'
+import { Route as GateadoDashboardRouteImport } from './routes/_gateado/dashboard'
+import { Route as GateadoDiagnosticoRouteImport } from './routes/_gateado/diagnostico'
+import { Route as GateadoFacturasRouteImport } from './routes/_gateado/facturas'
+import { Route as GateadoFichaRouteImport } from './routes/_gateado/ficha'
+import { Route as GateadoInformesRouteImport } from './routes/_gateado/informes'
+import { Route as GateadoMovimientosRouteImport } from './routes/_gateado/movimientos'
+import { Route as GateadoProveedoresRouteImport } from './routes/_gateado/proveedores'
+import { Route as GateadoSnapshotsRouteImport } from './routes/_gateado/snapshots'
+import { Route as GateadoTransferenciasRouteImport } from './routes/_gateado/transferencias'
+import { Route as GateadoValidacionRouteImport } from './routes/_gateado/validacion'
+import { Route as GateadoVencimientosRouteImport } from './routes/_gateado/vencimientos'
 
-const IndexRoute = IndexRouteImport.update({
+const GateadoRouteRoute = GateadoRouteRouteImport.update({
+  id: '/_gateado',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnlockRoute = UnlockRouteImport.update({
+  id: '/unlock',
+  path: '/unlock',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GateadoIndexRoute = GateadoIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const AuditoriaRoute = AuditoriaRouteImport.update({
+const GateadoAuditoriaRoute = GateadoAuditoriaRouteImport.update({
   id: '/auditoria',
   path: '/auditoria',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const BackupRoute = BackupRouteImport.update({
+const GateadoBackupRoute = GateadoBackupRouteImport.update({
   id: '/backup',
   path: '/backup',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const CategoriasRoute = CategoriasRouteImport.update({
+const GateadoCategoriasRoute = GateadoCategoriasRouteImport.update({
   id: '/categorias',
   path: '/categorias',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const ComparativaRoute = ComparativaRouteImport.update({
+const GateadoComparativaRoute = GateadoComparativaRouteImport.update({
   id: '/comparativa',
   path: '/comparativa',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const CompromisosRoute = CompromisosRouteImport.update({
+const GateadoCompromisosRoute = GateadoCompromisosRouteImport.update({
   id: '/compromisos',
   path: '/compromisos',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const ConciliacionesRoute = ConciliacionesRouteImport.update({
+const GateadoConciliacionesRoute = GateadoConciliacionesRouteImport.update({
   id: '/conciliaciones',
   path: '/conciliaciones',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const CuentasRoute = CuentasRouteImport.update({
+const GateadoCuentasRoute = GateadoCuentasRouteImport.update({
   id: '/cuentas',
   path: '/cuentas',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
+const GateadoDashboardRoute = GateadoDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const DiagnosticoRoute = DiagnosticoRouteImport.update({
+const GateadoDiagnosticoRoute = GateadoDiagnosticoRouteImport.update({
   id: '/diagnostico',
   path: '/diagnostico',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const FacturasRoute = FacturasRouteImport.update({
+const GateadoFacturasRoute = GateadoFacturasRouteImport.update({
   id: '/facturas',
   path: '/facturas',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const FichaRoute = FichaRouteImport.update({
+const GateadoFichaRoute = GateadoFichaRouteImport.update({
   id: '/ficha',
   path: '/ficha',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const InformesRoute = InformesRouteImport.update({
+const GateadoInformesRoute = GateadoInformesRouteImport.update({
   id: '/informes',
   path: '/informes',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MovimientosRoute = MovimientosRouteImport.update({
+const GateadoMovimientosRoute = GateadoMovimientosRouteImport.update({
   id: '/movimientos',
   path: '/movimientos',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const ProveedoresRoute = ProveedoresRouteImport.update({
+const GateadoProveedoresRoute = GateadoProveedoresRouteImport.update({
   id: '/proveedores',
   path: '/proveedores',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const SnapshotsRoute = SnapshotsRouteImport.update({
+const GateadoSnapshotsRoute = GateadoSnapshotsRouteImport.update({
   id: '/snapshots',
   path: '/snapshots',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const TransferenciasRoute = TransferenciasRouteImport.update({
+const GateadoTransferenciasRoute = GateadoTransferenciasRouteImport.update({
   id: '/transferencias',
   path: '/transferencias',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const ValidacionRoute = ValidacionRouteImport.update({
+const GateadoValidacionRoute = GateadoValidacionRouteImport.update({
   id: '/validacion',
   path: '/validacion',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const VencimientosRoute = VencimientosRouteImport.update({
+const GateadoVencimientosRoute = GateadoVencimientosRouteImport.update({
   id: '/vencimientos',
   path: '/vencimientos',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GateadoRouteRoute,
 } as any)
-const Char91DotwellKnownChar93OauthProtectedResourceRoute =
-  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
-    id: '/.well-known/oauth-protected-resource',
-    path: '/.well-known/oauth-protected-resource',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/auditoria': typeof AuditoriaRoute
-  '/backup': typeof BackupRoute
-  '/categorias': typeof CategoriasRoute
-  '/comparativa': typeof ComparativaRoute
-  '/compromisos': typeof CompromisosRoute
-  '/conciliaciones': typeof ConciliacionesRoute
-  '/cuentas': typeof CuentasRoute
-  '/dashboard': typeof DashboardRoute
-  '/diagnostico': typeof DiagnosticoRoute
-  '/facturas': typeof FacturasRoute
-  '/ficha': typeof FichaRoute
-  '/informes': typeof InformesRoute
-  '/mcp': typeof McpRoute
-  '/movimientos': typeof MovimientosRoute
-  '/proveedores': typeof ProveedoresRoute
-  '/snapshots': typeof SnapshotsRoute
-  '/transferencias': typeof TransferenciasRoute
-  '/validacion': typeof ValidacionRoute
-  '/vencimientos': typeof VencimientosRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/': typeof GateadoIndexRoute
+  '/unlock': typeof UnlockRoute
+  '/auditoria': typeof GateadoAuditoriaRoute
+  '/backup': typeof GateadoBackupRoute
+  '/categorias': typeof GateadoCategoriasRoute
+  '/comparativa': typeof GateadoComparativaRoute
+  '/compromisos': typeof GateadoCompromisosRoute
+  '/conciliaciones': typeof GateadoConciliacionesRoute
+  '/cuentas': typeof GateadoCuentasRoute
+  '/dashboard': typeof GateadoDashboardRoute
+  '/diagnostico': typeof GateadoDiagnosticoRoute
+  '/facturas': typeof GateadoFacturasRoute
+  '/ficha': typeof GateadoFichaRoute
+  '/informes': typeof GateadoInformesRoute
+  '/movimientos': typeof GateadoMovimientosRoute
+  '/proveedores': typeof GateadoProveedoresRoute
+  '/snapshots': typeof GateadoSnapshotsRoute
+  '/transferencias': typeof GateadoTransferenciasRoute
+  '/validacion': typeof GateadoValidacionRoute
+  '/vencimientos': typeof GateadoVencimientosRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/auditoria': typeof AuditoriaRoute
-  '/backup': typeof BackupRoute
-  '/categorias': typeof CategoriasRoute
-  '/comparativa': typeof ComparativaRoute
-  '/compromisos': typeof CompromisosRoute
-  '/conciliaciones': typeof ConciliacionesRoute
-  '/cuentas': typeof CuentasRoute
-  '/dashboard': typeof DashboardRoute
-  '/diagnostico': typeof DiagnosticoRoute
-  '/facturas': typeof FacturasRoute
-  '/ficha': typeof FichaRoute
-  '/informes': typeof InformesRoute
-  '/mcp': typeof McpRoute
-  '/movimientos': typeof MovimientosRoute
-  '/proveedores': typeof ProveedoresRoute
-  '/snapshots': typeof SnapshotsRoute
-  '/transferencias': typeof TransferenciasRoute
-  '/validacion': typeof ValidacionRoute
-  '/vencimientos': typeof VencimientosRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/unlock': typeof UnlockRoute
+  '/auditoria': typeof GateadoAuditoriaRoute
+  '/backup': typeof GateadoBackupRoute
+  '/categorias': typeof GateadoCategoriasRoute
+  '/comparativa': typeof GateadoComparativaRoute
+  '/compromisos': typeof GateadoCompromisosRoute
+  '/conciliaciones': typeof GateadoConciliacionesRoute
+  '/cuentas': typeof GateadoCuentasRoute
+  '/dashboard': typeof GateadoDashboardRoute
+  '/diagnostico': typeof GateadoDiagnosticoRoute
+  '/facturas': typeof GateadoFacturasRoute
+  '/ficha': typeof GateadoFichaRoute
+  '/informes': typeof GateadoInformesRoute
+  '/movimientos': typeof GateadoMovimientosRoute
+  '/proveedores': typeof GateadoProveedoresRoute
+  '/snapshots': typeof GateadoSnapshotsRoute
+  '/transferencias': typeof GateadoTransferenciasRoute
+  '/validacion': typeof GateadoValidacionRoute
+  '/vencimientos': typeof GateadoVencimientosRoute
+  '/': typeof GateadoIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/auditoria': typeof AuditoriaRoute
-  '/backup': typeof BackupRoute
-  '/categorias': typeof CategoriasRoute
-  '/comparativa': typeof ComparativaRoute
-  '/compromisos': typeof CompromisosRoute
-  '/conciliaciones': typeof ConciliacionesRoute
-  '/cuentas': typeof CuentasRoute
-  '/dashboard': typeof DashboardRoute
-  '/diagnostico': typeof DiagnosticoRoute
-  '/facturas': typeof FacturasRoute
-  '/ficha': typeof FichaRoute
-  '/informes': typeof InformesRoute
-  '/mcp': typeof McpRoute
-  '/movimientos': typeof MovimientosRoute
-  '/proveedores': typeof ProveedoresRoute
-  '/snapshots': typeof SnapshotsRoute
-  '/transferencias': typeof TransferenciasRoute
-  '/validacion': typeof ValidacionRoute
-  '/vencimientos': typeof VencimientosRoute
-  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/_gateado': typeof GateadoRouteRouteWithChildren
+  '/unlock': typeof UnlockRoute
+  '/_gateado/auditoria': typeof GateadoAuditoriaRoute
+  '/_gateado/backup': typeof GateadoBackupRoute
+  '/_gateado/categorias': typeof GateadoCategoriasRoute
+  '/_gateado/comparativa': typeof GateadoComparativaRoute
+  '/_gateado/compromisos': typeof GateadoCompromisosRoute
+  '/_gateado/conciliaciones': typeof GateadoConciliacionesRoute
+  '/_gateado/cuentas': typeof GateadoCuentasRoute
+  '/_gateado/dashboard': typeof GateadoDashboardRoute
+  '/_gateado/diagnostico': typeof GateadoDiagnosticoRoute
+  '/_gateado/facturas': typeof GateadoFacturasRoute
+  '/_gateado/ficha': typeof GateadoFichaRoute
+  '/_gateado/informes': typeof GateadoInformesRoute
+  '/_gateado/movimientos': typeof GateadoMovimientosRoute
+  '/_gateado/proveedores': typeof GateadoProveedoresRoute
+  '/_gateado/snapshots': typeof GateadoSnapshotsRoute
+  '/_gateado/transferencias': typeof GateadoTransferenciasRoute
+  '/_gateado/validacion': typeof GateadoValidacionRoute
+  '/_gateado/vencimientos': typeof GateadoVencimientosRoute
+  '/_gateado/': typeof GateadoIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/unlock'
     | '/auditoria'
     | '/backup'
     | '/categorias'
@@ -224,17 +221,15 @@ export interface FileRouteTypes {
     | '/facturas'
     | '/ficha'
     | '/informes'
-    | '/mcp'
     | '/movimientos'
     | '/proveedores'
     | '/snapshots'
     | '/transferencias'
     | '/validacion'
     | '/vencimientos'
-    | '/.well-known/oauth-protected-resource'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
+    | '/unlock'
     | '/auditoria'
     | '/backup'
     | '/categorias'
@@ -247,238 +242,246 @@ export interface FileRouteTypes {
     | '/facturas'
     | '/ficha'
     | '/informes'
-    | '/mcp'
     | '/movimientos'
     | '/proveedores'
     | '/snapshots'
     | '/transferencias'
     | '/validacion'
     | '/vencimientos'
-    | '/.well-known/oauth-protected-resource'
+    | '/'
   id:
     | '__root__'
-    | '/'
-    | '/auditoria'
-    | '/backup'
-    | '/categorias'
-    | '/comparativa'
-    | '/compromisos'
-    | '/conciliaciones'
-    | '/cuentas'
-    | '/dashboard'
-    | '/diagnostico'
-    | '/facturas'
-    | '/ficha'
-    | '/informes'
-    | '/mcp'
-    | '/movimientos'
-    | '/proveedores'
-    | '/snapshots'
-    | '/transferencias'
-    | '/validacion'
-    | '/vencimientos'
-    | '/.well-known/oauth-protected-resource'
+    | '/_gateado'
+    | '/unlock'
+    | '/_gateado/auditoria'
+    | '/_gateado/backup'
+    | '/_gateado/categorias'
+    | '/_gateado/comparativa'
+    | '/_gateado/compromisos'
+    | '/_gateado/conciliaciones'
+    | '/_gateado/cuentas'
+    | '/_gateado/dashboard'
+    | '/_gateado/diagnostico'
+    | '/_gateado/facturas'
+    | '/_gateado/ficha'
+    | '/_gateado/informes'
+    | '/_gateado/movimientos'
+    | '/_gateado/proveedores'
+    | '/_gateado/snapshots'
+    | '/_gateado/transferencias'
+    | '/_gateado/validacion'
+    | '/_gateado/vencimientos'
+    | '/_gateado/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AuditoriaRoute: typeof AuditoriaRoute
-  BackupRoute: typeof BackupRoute
-  CategoriasRoute: typeof CategoriasRoute
-  ComparativaRoute: typeof ComparativaRoute
-  CompromisosRoute: typeof CompromisosRoute
-  ConciliacionesRoute: typeof ConciliacionesRoute
-  CuentasRoute: typeof CuentasRoute
-  DashboardRoute: typeof DashboardRoute
-  DiagnosticoRoute: typeof DiagnosticoRoute
-  FacturasRoute: typeof FacturasRoute
-  FichaRoute: typeof FichaRoute
-  InformesRoute: typeof InformesRoute
-  McpRoute: typeof McpRoute
-  MovimientosRoute: typeof MovimientosRoute
-  ProveedoresRoute: typeof ProveedoresRoute
-  SnapshotsRoute: typeof SnapshotsRoute
-  TransferenciasRoute: typeof TransferenciasRoute
-  ValidacionRoute: typeof ValidacionRoute
-  VencimientosRoute: typeof VencimientosRoute
-  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  GateadoRouteRoute: typeof GateadoRouteRouteWithChildren
+  UnlockRoute: typeof UnlockRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_gateado': {
+      id: '/_gateado'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof GateadoRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unlock': {
+      id: '/unlock'
+      path: '/unlock'
+      fullPath: '/unlock'
+      preLoaderRoute: typeof UnlockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_gateado/': {
+      id: '/_gateado/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoIndexRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/auditoria': {
-      id: '/auditoria'
+    '/_gateado/auditoria': {
+      id: '/_gateado/auditoria'
       path: '/auditoria'
       fullPath: '/auditoria'
-      preLoaderRoute: typeof AuditoriaRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoAuditoriaRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/backup': {
-      id: '/backup'
+    '/_gateado/backup': {
+      id: '/_gateado/backup'
       path: '/backup'
       fullPath: '/backup'
-      preLoaderRoute: typeof BackupRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoBackupRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/categorias': {
-      id: '/categorias'
+    '/_gateado/categorias': {
+      id: '/_gateado/categorias'
       path: '/categorias'
       fullPath: '/categorias'
-      preLoaderRoute: typeof CategoriasRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoCategoriasRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/comparativa': {
-      id: '/comparativa'
+    '/_gateado/comparativa': {
+      id: '/_gateado/comparativa'
       path: '/comparativa'
       fullPath: '/comparativa'
-      preLoaderRoute: typeof ComparativaRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoComparativaRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/compromisos': {
-      id: '/compromisos'
+    '/_gateado/compromisos': {
+      id: '/_gateado/compromisos'
       path: '/compromisos'
       fullPath: '/compromisos'
-      preLoaderRoute: typeof CompromisosRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoCompromisosRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/conciliaciones': {
-      id: '/conciliaciones'
+    '/_gateado/conciliaciones': {
+      id: '/_gateado/conciliaciones'
       path: '/conciliaciones'
       fullPath: '/conciliaciones'
-      preLoaderRoute: typeof ConciliacionesRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoConciliacionesRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/cuentas': {
-      id: '/cuentas'
+    '/_gateado/cuentas': {
+      id: '/_gateado/cuentas'
       path: '/cuentas'
       fullPath: '/cuentas'
-      preLoaderRoute: typeof CuentasRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoCuentasRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/dashboard': {
-      id: '/dashboard'
+    '/_gateado/dashboard': {
+      id: '/_gateado/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoDashboardRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/diagnostico': {
-      id: '/diagnostico'
+    '/_gateado/diagnostico': {
+      id: '/_gateado/diagnostico'
       path: '/diagnostico'
       fullPath: '/diagnostico'
-      preLoaderRoute: typeof DiagnosticoRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoDiagnosticoRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/facturas': {
-      id: '/facturas'
+    '/_gateado/facturas': {
+      id: '/_gateado/facturas'
       path: '/facturas'
       fullPath: '/facturas'
-      preLoaderRoute: typeof FacturasRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoFacturasRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/ficha': {
-      id: '/ficha'
+    '/_gateado/ficha': {
+      id: '/_gateado/ficha'
       path: '/ficha'
       fullPath: '/ficha'
-      preLoaderRoute: typeof FichaRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoFichaRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/informes': {
-      id: '/informes'
+    '/_gateado/informes': {
+      id: '/_gateado/informes'
       path: '/informes'
       fullPath: '/informes'
-      preLoaderRoute: typeof InformesRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoInformesRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/movimientos': {
-      id: '/movimientos'
+    '/_gateado/movimientos': {
+      id: '/_gateado/movimientos'
       path: '/movimientos'
       fullPath: '/movimientos'
-      preLoaderRoute: typeof MovimientosRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoMovimientosRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/proveedores': {
-      id: '/proveedores'
+    '/_gateado/proveedores': {
+      id: '/_gateado/proveedores'
       path: '/proveedores'
       fullPath: '/proveedores'
-      preLoaderRoute: typeof ProveedoresRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoProveedoresRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/snapshots': {
-      id: '/snapshots'
+    '/_gateado/snapshots': {
+      id: '/_gateado/snapshots'
       path: '/snapshots'
       fullPath: '/snapshots'
-      preLoaderRoute: typeof SnapshotsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoSnapshotsRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/transferencias': {
-      id: '/transferencias'
+    '/_gateado/transferencias': {
+      id: '/_gateado/transferencias'
       path: '/transferencias'
       fullPath: '/transferencias'
-      preLoaderRoute: typeof TransferenciasRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoTransferenciasRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/validacion': {
-      id: '/validacion'
+    '/_gateado/validacion': {
+      id: '/_gateado/validacion'
       path: '/validacion'
       fullPath: '/validacion'
-      preLoaderRoute: typeof ValidacionRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoValidacionRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
-    '/vencimientos': {
-      id: '/vencimientos'
+    '/_gateado/vencimientos': {
+      id: '/_gateado/vencimientos'
       path: '/vencimientos'
       fullPath: '/vencimientos'
-      preLoaderRoute: typeof VencimientosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/.well-known/oauth-protected-resource': {
-      id: '/.well-known/oauth-protected-resource'
-      path: '/.well-known/oauth-protected-resource'
-      fullPath: '/.well-known/oauth-protected-resource'
-      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GateadoVencimientosRouteImport
+      parentRoute: typeof GateadoRouteRoute
     }
   }
 }
 
+interface GateadoRouteRouteChildren {
+  GateadoAuditoriaRoute: typeof GateadoAuditoriaRoute
+  GateadoBackupRoute: typeof GateadoBackupRoute
+  GateadoCategoriasRoute: typeof GateadoCategoriasRoute
+  GateadoComparativaRoute: typeof GateadoComparativaRoute
+  GateadoCompromisosRoute: typeof GateadoCompromisosRoute
+  GateadoConciliacionesRoute: typeof GateadoConciliacionesRoute
+  GateadoCuentasRoute: typeof GateadoCuentasRoute
+  GateadoDashboardRoute: typeof GateadoDashboardRoute
+  GateadoDiagnosticoRoute: typeof GateadoDiagnosticoRoute
+  GateadoFacturasRoute: typeof GateadoFacturasRoute
+  GateadoFichaRoute: typeof GateadoFichaRoute
+  GateadoInformesRoute: typeof GateadoInformesRoute
+  GateadoMovimientosRoute: typeof GateadoMovimientosRoute
+  GateadoProveedoresRoute: typeof GateadoProveedoresRoute
+  GateadoSnapshotsRoute: typeof GateadoSnapshotsRoute
+  GateadoTransferenciasRoute: typeof GateadoTransferenciasRoute
+  GateadoValidacionRoute: typeof GateadoValidacionRoute
+  GateadoVencimientosRoute: typeof GateadoVencimientosRoute
+  GateadoIndexRoute: typeof GateadoIndexRoute
+}
+
+const GateadoRouteRouteChildren: GateadoRouteRouteChildren = {
+  GateadoAuditoriaRoute: GateadoAuditoriaRoute,
+  GateadoBackupRoute: GateadoBackupRoute,
+  GateadoCategoriasRoute: GateadoCategoriasRoute,
+  GateadoComparativaRoute: GateadoComparativaRoute,
+  GateadoCompromisosRoute: GateadoCompromisosRoute,
+  GateadoConciliacionesRoute: GateadoConciliacionesRoute,
+  GateadoCuentasRoute: GateadoCuentasRoute,
+  GateadoDashboardRoute: GateadoDashboardRoute,
+  GateadoDiagnosticoRoute: GateadoDiagnosticoRoute,
+  GateadoFacturasRoute: GateadoFacturasRoute,
+  GateadoFichaRoute: GateadoFichaRoute,
+  GateadoInformesRoute: GateadoInformesRoute,
+  GateadoMovimientosRoute: GateadoMovimientosRoute,
+  GateadoProveedoresRoute: GateadoProveedoresRoute,
+  GateadoSnapshotsRoute: GateadoSnapshotsRoute,
+  GateadoTransferenciasRoute: GateadoTransferenciasRoute,
+  GateadoValidacionRoute: GateadoValidacionRoute,
+  GateadoVencimientosRoute: GateadoVencimientosRoute,
+  GateadoIndexRoute: GateadoIndexRoute,
+}
+
+const GateadoRouteRouteWithChildren = GateadoRouteRoute._addFileChildren(
+  GateadoRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AuditoriaRoute: AuditoriaRoute,
-  BackupRoute: BackupRoute,
-  CategoriasRoute: CategoriasRoute,
-  ComparativaRoute: ComparativaRoute,
-  CompromisosRoute: CompromisosRoute,
-  ConciliacionesRoute: ConciliacionesRoute,
-  CuentasRoute: CuentasRoute,
-  DashboardRoute: DashboardRoute,
-  DiagnosticoRoute: DiagnosticoRoute,
-  FacturasRoute: FacturasRoute,
-  FichaRoute: FichaRoute,
-  InformesRoute: InformesRoute,
-  McpRoute: McpRoute,
-  MovimientosRoute: MovimientosRoute,
-  ProveedoresRoute: ProveedoresRoute,
-  SnapshotsRoute: SnapshotsRoute,
-  TransferenciasRoute: TransferenciasRoute,
-  ValidacionRoute: ValidacionRoute,
-  VencimientosRoute: VencimientosRoute,
-  Char91DotwellKnownChar93OauthProtectedResourceRoute:
-    Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  GateadoRouteRoute: GateadoRouteRouteWithChildren,
+  UnlockRoute: UnlockRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -32,7 +32,7 @@ import {
 } from "@/lib/datos";
 import { normalizarNombre } from "@/lib/secciones";
 
-export const Route = createFileRoute("/proveedores")({
+export const Route = createFileRoute("/_gateado/proveedores")({
   head: () => ({
     meta: [
       { title: "Proveedores · Farmatrack" },

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PantallaPendiente } from "@/components/PantallaPendiente";
 
-export const Route = createFileRoute("/comparativa")({
+export const Route = createFileRoute("/_gateado/comparativa")({
   head: () => ({
     meta: [
       { title: "Comparativa · Farmatrack" },

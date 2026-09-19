@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PantallaPendiente } from "@/components/PantallaPendiente";
 
-export const Route = createFileRoute("/snapshots")({
+export const Route = createFileRoute("/_gateado/snapshots")({
   head: () => ({
     meta: [
       { title: "Saldo bancario · Farmatrack" },
