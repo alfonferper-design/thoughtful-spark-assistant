@@ -8,6 +8,7 @@ import {
   guardarActor as guardarActorFn,
 } from "@/lib/datos.functions";
 import {
+  listarDocumentosFactura,
   listarFacturas,
   listarLineasFactura,
   obtenerFactura,
@@ -19,6 +20,7 @@ import type {
   EstadoDuplicadoFactura,
   TipoFactura,
 } from "@/lib/listas-factura";
+import type { EstadoDocumento } from "@/lib/documentos";
 import type {
   EstadoLineaFactura,
   OrigenImportesLinea,
@@ -203,6 +205,32 @@ export function useLineasFactura(facturaId: string, incluirEliminadas = false) {
   return useQuery({
     queryKey: ["factura-lineas", facturaId, incluirEliminadas],
     queryFn: () => listarLineasFactura({ data: { facturaId, incluirEliminadas } }),
+    enabled: abierta && !!facturaId,
+    retry: false,
+  });
+}
+
+export type DocumentoFactura = {
+  id: string;
+  factura_id: string;
+  nombre_original: string;
+  tipo_mime: string;
+  tamano_bytes: number;
+  hash_sha256: string;
+  fecha_incorporacion: string;
+  actor: string;
+  referencia_almacenamiento: string;
+  estado_documento: EstadoDocumento;
+  entorno: "produccion" | "prueba";
+  created_at: string;
+  updated_at: string;
+};
+
+export function useDocumentosFactura(facturaId: string) {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["factura-documentos", facturaId],
+    queryFn: () => listarDocumentosFactura({ data: { facturaId } }),
     enabled: abierta && !!facturaId,
     retry: false,
   });
