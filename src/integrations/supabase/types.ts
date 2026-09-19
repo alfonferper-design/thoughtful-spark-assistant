@@ -559,6 +559,53 @@ export type Database = {
           },
         ]
       }
+      vencimientos: {
+        Row: {
+          compromiso_fijo_id: string | null
+          created_at: string
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          estado: Database["public"]["Enums"]["vencimiento_estado"]
+          factura_id: string | null
+          fecha: string
+          id: string
+          importe: number
+          tipo: Database["public"]["Enums"]["vencimiento_tipo"]
+          tipo_vencimiento: Database["public"]["Enums"]["vencimiento_clase"]
+        }
+        Insert: {
+          compromiso_fijo_id?: string | null
+          created_at?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          estado?: Database["public"]["Enums"]["vencimiento_estado"]
+          factura_id?: string | null
+          fecha: string
+          id?: string
+          importe: number
+          tipo: Database["public"]["Enums"]["vencimiento_tipo"]
+          tipo_vencimiento?: Database["public"]["Enums"]["vencimiento_clase"]
+        }
+        Update: {
+          compromiso_fijo_id?: string | null
+          created_at?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          estado?: Database["public"]["Enums"]["vencimiento_estado"]
+          factura_id?: string | null
+          fecha?: string
+          id?: string
+          importe?: number
+          tipo?: Database["public"]["Enums"]["vencimiento_tipo"]
+          tipo_vencimiento?: Database["public"]["Enums"]["vencimiento_clase"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vencimientos_factura_id_fkey"
+            columns: ["factura_id"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -605,6 +652,14 @@ export type Database = {
         | "Financiación"
         | "Transferencia interna"
       proveedor_tipo: "Cooperativa" | "Mayorista" | "Laboratorio" | "Servicio"
+      vencimiento_clase: "Pago" | "Cobro"
+      vencimiento_estado: "Previsto" | "Pendiente" | "Pagado"
+      vencimiento_tipo:
+        | "Proveedor"
+        | "Impuesto"
+        | "Nómina"
+        | "Financiación"
+        | "Otro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -775,6 +830,15 @@ export const Constants = {
         "Transferencia interna",
       ],
       proveedor_tipo: ["Cooperativa", "Mayorista", "Laboratorio", "Servicio"],
+      vencimiento_clase: ["Pago", "Cobro"],
+      vencimiento_estado: ["Previsto", "Pendiente", "Pagado"],
+      vencimiento_tipo: [
+        "Proveedor",
+        "Impuesto",
+        "Nómina",
+        "Financiación",
+        "Otro",
+      ],
     },
   },
 } as const
