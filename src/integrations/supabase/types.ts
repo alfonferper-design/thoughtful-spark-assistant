@@ -133,6 +133,130 @@ export type Database = {
         }
         Relationships: []
       }
+      facturas: {
+        Row: {
+          base_imponible: number | null
+          categoria_id: string | null
+          condiciones_pago: string | null
+          created_at: string
+          desglose_fiscal: Json
+          documento_original: string | null
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          estado: string
+          estado_contable: Database["public"]["Enums"]["factura_estado_contable"]
+          estado_documental: Database["public"]["Enums"]["factura_estado_documental"]
+          estado_duplicado: Database["public"]["Enums"]["factura_estado_duplicado"]
+          factura_relacionada_id: string | null
+          fecha: string
+          fecha_contabilizacion: string | null
+          fecha_emision: string
+          fecha_recepcion: string | null
+          fecha_resolucion: string | null
+          fecha_vencimiento: string | null
+          forma_pago: string | null
+          id: string
+          iva: number | null
+          moneda: string
+          naturaleza: string | null
+          numero_factura: string | null
+          observaciones: string | null
+          proveedor_id: string
+          resuelto_por: string | null
+          tipo_factura: Database["public"]["Enums"]["factura_tipo"]
+          total: number
+          usuario_crea: string
+          usuario_valida: string | null
+        }
+        Insert: {
+          base_imponible?: number | null
+          categoria_id?: string | null
+          condiciones_pago?: string | null
+          created_at?: string
+          desglose_fiscal?: Json
+          documento_original?: string | null
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          estado?: string
+          estado_contable?: Database["public"]["Enums"]["factura_estado_contable"]
+          estado_documental?: Database["public"]["Enums"]["factura_estado_documental"]
+          estado_duplicado?: Database["public"]["Enums"]["factura_estado_duplicado"]
+          factura_relacionada_id?: string | null
+          fecha: string
+          fecha_contabilizacion?: string | null
+          fecha_emision: string
+          fecha_recepcion?: string | null
+          fecha_resolucion?: string | null
+          fecha_vencimiento?: string | null
+          forma_pago?: string | null
+          id?: string
+          iva?: number | null
+          moneda?: string
+          naturaleza?: string | null
+          numero_factura?: string | null
+          observaciones?: string | null
+          proveedor_id: string
+          resuelto_por?: string | null
+          tipo_factura?: Database["public"]["Enums"]["factura_tipo"]
+          total: number
+          usuario_crea: string
+          usuario_valida?: string | null
+        }
+        Update: {
+          base_imponible?: number | null
+          categoria_id?: string | null
+          condiciones_pago?: string | null
+          created_at?: string
+          desglose_fiscal?: Json
+          documento_original?: string | null
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          estado?: string
+          estado_contable?: Database["public"]["Enums"]["factura_estado_contable"]
+          estado_documental?: Database["public"]["Enums"]["factura_estado_documental"]
+          estado_duplicado?: Database["public"]["Enums"]["factura_estado_duplicado"]
+          factura_relacionada_id?: string | null
+          fecha?: string
+          fecha_contabilizacion?: string | null
+          fecha_emision?: string
+          fecha_recepcion?: string | null
+          fecha_resolucion?: string | null
+          fecha_vencimiento?: string | null
+          forma_pago?: string | null
+          id?: string
+          iva?: number | null
+          moneda?: string
+          naturaleza?: string | null
+          numero_factura?: string | null
+          observaciones?: string | null
+          proveedor_id?: string
+          resuelto_por?: string | null
+          tipo_factura?: Database["public"]["Enums"]["factura_tipo"]
+          total?: number
+          usuario_crea?: string
+          usuario_valida?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facturas_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_factura_relacionada_id_fkey"
+            columns: ["factura_relacionada_id"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "facturas_proveedor_id_fkey"
+            columns: ["proveedor_id"]
+            isOneToOne: false
+            referencedRelation: "proveedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proveedores: {
         Row: {
           activo: boolean
@@ -203,6 +327,19 @@ export type Database = {
         | "Línea de crédito"
         | "Cuenta de inversión"
       entorno_tipo: "produccion" | "prueba"
+      factura_estado_contable: "Pendiente" | "Contabilizada" | "Revisada"
+      factura_estado_documental:
+        | "Recibida"
+        | "En revisión"
+        | "Validada"
+        | "Incidencia"
+        | "Anulada"
+      factura_estado_duplicado:
+        | "No detectado"
+        | "Posible duplicado"
+        | "Duplicado confirmado"
+        | "Falso positivo"
+      factura_tipo: "Normal" | "Rectificativa" | "Abono"
       proveedor_tipo: "Cooperativa" | "Mayorista" | "Laboratorio" | "Servicio"
     }
     CompositeTypes: {
@@ -338,6 +475,21 @@ export const Constants = {
         "Cuenta de inversión",
       ],
       entorno_tipo: ["produccion", "prueba"],
+      factura_estado_contable: ["Pendiente", "Contabilizada", "Revisada"],
+      factura_estado_documental: [
+        "Recibida",
+        "En revisión",
+        "Validada",
+        "Incidencia",
+        "Anulada",
+      ],
+      factura_estado_duplicado: [
+        "No detectado",
+        "Posible duplicado",
+        "Duplicado confirmado",
+        "Falso positivo",
+      ],
+      factura_tipo: ["Normal", "Rectificativa", "Abono"],
       proveedor_tipo: ["Cooperativa", "Mayorista", "Laboratorio", "Servicio"],
     },
   },

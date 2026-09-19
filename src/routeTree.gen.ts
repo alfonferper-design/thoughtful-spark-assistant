@@ -30,6 +30,7 @@ import { Route as GateadoSnapshotsRouteImport } from './routes/_gateado/snapshot
 import { Route as GateadoTransferenciasRouteImport } from './routes/_gateado/transferencias'
 import { Route as GateadoValidacionRouteImport } from './routes/_gateado/validacion'
 import { Route as GateadoVencimientosRouteImport } from './routes/_gateado/vencimientos'
+import { Route as GateadoFacturasNuevaRouteImport } from './routes/_gateado/facturas_.nueva'
 
 const GateadoRouteRoute = GateadoRouteRouteImport.update({
   id: '/_gateado',
@@ -135,6 +136,11 @@ const GateadoVencimientosRoute = GateadoVencimientosRouteImport.update({
   path: '/vencimientos',
   getParentRoute: () => GateadoRouteRoute,
 } as any)
+const GateadoFacturasNuevaRoute = GateadoFacturasNuevaRouteImport.update({
+  id: '/facturas_/nueva',
+  path: '/facturas/nueva',
+  getParentRoute: () => GateadoRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof GateadoIndexRoute
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/transferencias': typeof GateadoTransferenciasRoute
   '/validacion': typeof GateadoValidacionRoute
   '/vencimientos': typeof GateadoVencimientosRoute
+  '/facturas/nueva': typeof GateadoFacturasNuevaRoute
 }
 export interface FileRoutesByTo {
   '/unlock': typeof UnlockRoute
@@ -179,6 +186,7 @@ export interface FileRoutesByTo {
   '/validacion': typeof GateadoValidacionRoute
   '/vencimientos': typeof GateadoVencimientosRoute
   '/': typeof GateadoIndexRoute
+  '/facturas/nueva': typeof GateadoFacturasNuevaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -203,6 +211,7 @@ export interface FileRoutesById {
   '/_gateado/validacion': typeof GateadoValidacionRoute
   '/_gateado/vencimientos': typeof GateadoVencimientosRoute
   '/_gateado/': typeof GateadoIndexRoute
+  '/_gateado/facturas_/nueva': typeof GateadoFacturasNuevaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -227,6 +236,7 @@ export interface FileRouteTypes {
     | '/transferencias'
     | '/validacion'
     | '/vencimientos'
+    | '/facturas/nueva'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/unlock'
@@ -249,6 +259,7 @@ export interface FileRouteTypes {
     | '/validacion'
     | '/vencimientos'
     | '/'
+    | '/facturas/nueva'
   id:
     | '__root__'
     | '/_gateado'
@@ -272,6 +283,7 @@ export interface FileRouteTypes {
     | '/_gateado/validacion'
     | '/_gateado/vencimientos'
     | '/_gateado/'
+    | '/_gateado/facturas_/nueva'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -428,6 +440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GateadoVencimientosRouteImport
       parentRoute: typeof GateadoRouteRoute
     }
+    '/_gateado/facturas_/nueva': {
+      id: '/_gateado/facturas_/nueva'
+      path: '/facturas/nueva'
+      fullPath: '/facturas/nueva'
+      preLoaderRoute: typeof GateadoFacturasNuevaRouteImport
+      parentRoute: typeof GateadoRouteRoute
+    }
   }
 }
 
@@ -451,6 +470,7 @@ interface GateadoRouteRouteChildren {
   GateadoValidacionRoute: typeof GateadoValidacionRoute
   GateadoVencimientosRoute: typeof GateadoVencimientosRoute
   GateadoIndexRoute: typeof GateadoIndexRoute
+  GateadoFacturasNuevaRoute: typeof GateadoFacturasNuevaRoute
 }
 
 const GateadoRouteRouteChildren: GateadoRouteRouteChildren = {
@@ -473,6 +493,7 @@ const GateadoRouteRouteChildren: GateadoRouteRouteChildren = {
   GateadoValidacionRoute: GateadoValidacionRoute,
   GateadoVencimientosRoute: GateadoVencimientosRoute,
   GateadoIndexRoute: GateadoIndexRoute,
+  GateadoFacturasNuevaRoute: GateadoFacturasNuevaRoute,
 }
 
 const GateadoRouteRouteWithChildren = GateadoRouteRoute._addFileChildren(

@@ -103,10 +103,12 @@ function Navegacion({ onNavegar }: { onNavegar?: () => void }) {
 export function AppShell({
   titulo,
   descripcion,
+  acciones,
   children,
 }: {
   titulo: string;
   descripcion?: string;
+  acciones?: ReactNode;
   children: ReactNode;
 }) {
   const { actor, guardarActor } = useActor();
@@ -170,6 +172,7 @@ export function AppShell({
             </div>
           </div>
           <div className="flex items-end gap-2">
+            {acciones}
             <label className="text-xs text-muted-foreground">
               Responsable de los cambios
               <Input

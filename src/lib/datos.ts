@@ -7,7 +7,14 @@ import {
   obtenerActor,
   guardarActor as guardarActorFn,
 } from "@/lib/datos.functions";
+import { listarFacturas } from "@/lib/datos.functions";
 import { estadoPuerta } from "@/lib/gate.functions";
+import type {
+  EstadoContableFactura,
+  EstadoDocumentalFactura,
+  EstadoDuplicadoFactura,
+  TipoFactura,
+} from "@/lib/listas-factura";
 
 export type Cuenta = {
   id: string;
@@ -101,4 +108,48 @@ export function useActor() {
   }
 
   return { actor: query.data ?? "Alfonso", guardarActor };
+}
+
+export type Factura = {
+  id: string;
+  estado: string;
+  base_imponible: number | null;
+  iva: number | null;
+  documento_original: string | null;
+  resuelto_por: string | null;
+  fecha_resolucion: string | null;
+  proveedor_id: string;
+  fecha: string;
+  fecha_emision: string;
+  fecha_recepcion: string | null;
+  fecha_vencimiento: string | null;
+  fecha_contabilizacion: string | null;
+  numero_factura: string | null;
+  total: number;
+  estado_documental: EstadoDocumentalFactura;
+  estado_duplicado: EstadoDuplicadoFactura;
+  estado_contable: EstadoContableFactura;
+  naturaleza: string | null;
+  categoria_id: string | null;
+  moneda: string;
+  forma_pago: string | null;
+  condiciones_pago: string | null;
+  observaciones: string | null;
+  usuario_crea: string;
+  usuario_valida: string | null;
+  tipo_factura: TipoFactura;
+  factura_relacionada_id: string | null;
+  desglose_fiscal: unknown;
+  entorno: "produccion" | "prueba";
+  created_at: string;
+};
+
+export function useFacturas() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["facturas"],
+    queryFn: () => listarFacturas(),
+    enabled: abierta,
+    retry: false,
+  });
 }
