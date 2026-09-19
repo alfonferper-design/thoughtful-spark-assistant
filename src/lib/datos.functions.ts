@@ -1174,8 +1174,20 @@ const datosVencimientoSchema = z.object({
   actor: actorSchema,
 });
 
+type EntradaVencimiento = {
+  factura_id: string | null;
+  compromiso_fijo_id: string | null;
+  fecha: string;
+  importe: number;
+  estado: "Previsto" | "Pendiente";
+  tipo: "Proveedor" | "Impuesto" | "Nómina" | "Financiación" | "Otro";
+  tipo_vencimiento: "Pago" | "Cobro";
+  entorno?: "produccion" | "prueba";
+  actor: string;
+};
+
 /**
- * Única vía de escritura de Vencimiento (Parte 5.6). Validaciones en el orden
+ * Lógica única de alta de Vencimiento (Parte 5.6). Validaciones en el orden
  * exacto del documento:
  *  1. Regla 10: exactamente uno de factura_id / compromiso_fijo_id.
  *  2. importe finito y estrictamente > 0.
@@ -1185,91 +1197,92 @@ const datosVencimientoSchema = z.object({
  *     está construido todavía, así que ese camino se rechaza sin inventar nada.
  * 'Pagado' no es asignable aquí: solo lo pondrá registrarConciliacion().
  */
+async function altaVencimiento({ actor, ...entrada }: EntradaVencimiento) {
+  const admin = await adminAutorizado();
+  const v = await import("./vencimientos");
+
+  // 1 · Regla 10
+  if (entrada.factura_id && entrada.compromiso_fijo_id) {
+    throw new Error(v.MENSAJE_REGLA_10_AMBOS);
+  }
+  if (!entrada.factura_id && !entrada.compromiso_fijo_id) {
+    throw new Error(v.MENSAJE_REGLA_10_NINGUNO);
+  }
+
+  // 2 · importe
+  const importe = Number(entrada.importe);
+  if (!Number.isFinite(importe) || importe <= 0) {
+    throw new Error(v.MENSAJE_IMPORTE_VENCIMIENTO);
+  }
+
+  // 3 · fecha
+  if (!entrada.fecha || !entrada.fecha.trim()) {
+    throw new Error(v.MENSAJE_FECHA_VENCIMIENTO);
+  }
+
+  // 4 y 5 · origen
+  let entorno = entrada.entorno ?? "produccion";
+  if (entrada.factura_id) {
+    const { data: factura, error: errorFactura } = await admin
+      .from("facturas")
+      .select("id, estado_duplicado, entorno")
+      .eq("id", entrada.factura_id)
+      .maybeSingle();
+    if (errorFactura) throw new Error(errorFactura.message);
+    if (!factura) throw new Error(v.MENSAJE_FACTURA_NO_ENCONTRADA);
+    // Regla 9 (RB-006), re-validada en la escritura, no solo en el listado.
+    if (v.duplicadoBloqueaVencimiento(factura.estado_duplicado)) {
+      throw new Error(v.MENSAJE_REGLA_9);
+    }
+    entorno = factura.entorno;
+  } else {
+    throw new Error(v.MENSAJE_COMPROMISO_NO_DISPONIBLE);
+  }
+
+  const fila = {
+    factura_id: entrada.factura_id,
+    compromiso_fijo_id: entrada.compromiso_fijo_id,
+    fecha: entrada.fecha,
+    importe,
+    estado: entrada.estado,
+    tipo: entrada.tipo,
+    tipo_vencimiento: entrada.tipo_vencimiento,
+    entorno,
+  };
+
+  const { data: creado, error } = await admin
+    .from("vencimientos")
+    .insert(fila)
+    .select()
+    .single();
+  if (error) throw new Error(error.message);
+
+  await auditar(admin, {
+    entidad: "Vencimiento",
+    entidadId: creado.id,
+    accion: entrada.factura_id ? "crear_vencimiento_factura" : "crear_vencimiento_compromiso",
+    actor,
+    despues: fila,
+  });
+
+  return creado;
+}
+
+/** Única vía de escritura de Vencimiento desde la pantalla de alta manual. */
 export const crearVencimientoValidado = createServerFn({ method: "POST" })
   .inputValidator((data) =>
     datosVencimientoSchema
       .extend({
         factura_id: z.string().uuid().nullable(),
         compromiso_fijo_id: z.string().uuid().nullable(),
-        entorno: entornoSchema.optional(),
       })
       .parse(data),
   )
-  .handler(async ({ data }) => {
-    const admin = await adminAutorizado();
-    const v = await import("./vencimientos");
-    const { actor, ...entrada } = data;
-
-    // 1 · Regla 10
-    if (entrada.factura_id && entrada.compromiso_fijo_id) {
-      throw new Error(v.MENSAJE_REGLA_10_AMBOS);
-    }
-    if (!entrada.factura_id && !entrada.compromiso_fijo_id) {
-      throw new Error(v.MENSAJE_REGLA_10_NINGUNO);
-    }
-
-    // 2 · importe
-    const importe = Number(entrada.importe);
-    if (!Number.isFinite(importe) || importe <= 0) {
-      throw new Error(v.MENSAJE_IMPORTE_VENCIMIENTO);
-    }
-
-    // 3 · fecha
-    if (!entrada.fecha || !entrada.fecha.trim()) {
-      throw new Error(v.MENSAJE_FECHA_VENCIMIENTO);
-    }
-
-    // 4 y 5 · origen
-    let entorno = entrada.entorno ?? "produccion";
-    if (entrada.factura_id) {
-      const { data: factura, error: errorFactura } = await admin
-        .from("facturas")
-        .select("id, estado_duplicado, entorno")
-        .eq("id", entrada.factura_id)
-        .maybeSingle();
-      if (errorFactura) throw new Error(errorFactura.message);
-      if (!factura) throw new Error(v.MENSAJE_FACTURA_NO_ENCONTRADA);
-      // Regla 9 (RB-006), re-validada en la escritura, no solo en el listado.
-      if (v.duplicadoBloqueaVencimiento(factura.estado_duplicado)) {
-        throw new Error(v.MENSAJE_REGLA_9);
-      }
-      entorno = factura.entorno;
-    } else {
-      throw new Error(v.MENSAJE_COMPROMISO_NO_DISPONIBLE);
-    }
-
-    const fila = {
-      factura_id: entrada.factura_id,
-      compromiso_fijo_id: entrada.compromiso_fijo_id,
-      fecha: entrada.fecha,
-      importe,
-      estado: entrada.estado,
-      tipo: entrada.tipo,
-      tipo_vencimiento: entrada.tipo_vencimiento,
-      entorno,
-    };
-
-    const { data: creado, error } = await admin
-      .from("vencimientos")
-      .insert(fila)
-      .select()
-      .single();
-    if (error) throw new Error(error.message);
-
-    await auditar(admin, {
-      entidad: "Vencimiento",
-      entidadId: creado.id,
-      accion: entrada.factura_id ? "crear_vencimiento_factura" : "crear_vencimiento_compromiso",
-      actor,
-      despues: fila,
-    });
-
-    return creado;
-  });
+  .handler(async ({ data }) => await altaVencimiento(data));
 
 /**
  * Envoltorio usado por la Ficha de factura: fija factura_id y
- * compromiso_fijo_id = null y delega en crearVencimientoValidado().
+ * compromiso_fijo_id = null y delega en la misma lógica validada.
  */
 export const crearVencimientoFactura = createServerFn({ method: "POST" })
   .inputValidator((data) =>
@@ -1277,7 +1290,10 @@ export const crearVencimientoFactura = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     const { facturaId, ...datos } = data;
-    return await crearVencimientoValidado({
-      data: { ...datos, factura_id: facturaId, compromiso_fijo_id: null },
+    return await altaVencimiento({
+      ...datos,
+      factura_id: facturaId,
+      compromiso_fijo_id: null,
     });
   });
+
