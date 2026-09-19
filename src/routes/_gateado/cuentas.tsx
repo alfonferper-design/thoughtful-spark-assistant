@@ -199,6 +199,7 @@ function PantallaCuentas() {
                     <TableHead>Nombre</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead className="text-right">Saldo de apertura</TableHead>
+                    <TableHead className="text-right">Saldo interno (hoy)</TableHead>
                     <TableHead>Desde</TableHead>
                     <TableHead>Entorno</TableHead>
                   </TableRow>
@@ -210,6 +211,11 @@ function PantallaCuentas() {
                       <TableCell>{c.tipo}</TableCell>
                       <TableCell className="tabular text-right">
                         {formatoEuros(Number(c.saldo_apertura))}
+                      </TableCell>
+                      <TableCell className="tabular text-right">
+                        {saldoInternoDe(c.id) === null
+                          ? "—"
+                          : formatoEuros(redondearEuros(Number(saldoInternoDe(c.id))))}
                       </TableCell>
                       <TableCell className="tabular">{c.fecha_saldo_apertura}</TableCell>
                       <TableCell>
