@@ -11,7 +11,9 @@ import {
   listarDocumentosFactura,
   listarFacturas,
   listarLineasFactura,
+  listarMovimientos,
   obtenerFactura,
+  saldosInternosCuentas,
 } from "@/lib/datos.functions";
 import { estadoPuerta } from "@/lib/gate.functions";
 import type {
@@ -26,6 +28,14 @@ import type {
   OrigenImportesLinea,
   TipoDescuentoLinea,
 } from "@/lib/lineas-factura";
+import type {
+  ClasificacionOrigen,
+  DireccionMovimiento,
+  EstadoMovimiento,
+  OrigenMovimiento,
+  SubtipoFinanciacion,
+  TipoMovimiento,
+} from "@/lib/movimientos";
 
 export type Cuenta = {
   id: string;
