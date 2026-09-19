@@ -15,8 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-import { useActor, useCategorias, registrarAuditoria, type Categoria } from "@/lib/datos";
+import { useActor, useCategorias, type Categoria } from "@/lib/datos";
+import { crearCategoria } from "@/lib/datos.functions";
 
 export const Route = createFileRoute("/_gateado/categorias")({
   head: () => ({
@@ -56,25 +56,22 @@ function PantallaCategorias() {
       return;
     }
     setGuardando(true);
-    const datos = {
-      nombre: nombre.trim(),
-      tipo,
-      categoria_padre_id: padre === "ninguna" ? null : padre,
-      entorno,
-    };
-    const { data, error } = await supabase.from("categorias").insert(datos).select().single();
-    setGuardando(false);
-    if (error) {
-      toast.error("No se pudo crear: " + error.message);
+    try {
+      await crearCategoria({
+        data: {
+          nombre: nombre.trim(),
+          tipo,
+          categoria_padre_id: padre === "ninguna" ? null : padre,
+          entorno,
+          actor,
+        },
+      });
+    } catch (error) {
+      setGuardando(false);
+      toast.error("No se pudo crear: " + (error as Error).message);
       return;
     }
-    await registrarAuditoria({
-      entidad: "Categoria",
-      entidadId: data.id,
-      accion: "crear",
-      actor,
-      despues: datos,
-    });
+    setGuardando(false);
     await queryClient.invalidateQueries({ queryKey: ["categorias"] });
     await queryClient.invalidateQueries({ queryKey: ["auditoria"] });
     toast.success("Categoría creada");
