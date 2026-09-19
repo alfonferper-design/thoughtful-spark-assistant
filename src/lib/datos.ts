@@ -7,7 +7,11 @@ import {
   obtenerActor,
   guardarActor as guardarActorFn,
 } from "@/lib/datos.functions";
-import { listarFacturas } from "@/lib/datos.functions";
+import {
+  listarFacturas,
+  listarLineasFactura,
+  obtenerFactura,
+} from "@/lib/datos.functions";
 import { estadoPuerta } from "@/lib/gate.functions";
 import type {
   EstadoContableFactura,
@@ -15,6 +19,11 @@ import type {
   EstadoDuplicadoFactura,
   TipoFactura,
 } from "@/lib/listas-factura";
+import type {
+  EstadoLineaFactura,
+  OrigenImportesLinea,
+  TipoDescuentoLinea,
+} from "@/lib/lineas-factura";
 
 export type Cuenta = {
   id: string;
@@ -150,6 +159,51 @@ export function useFacturas() {
     queryKey: ["facturas"],
     queryFn: () => listarFacturas(),
     enabled: abierta,
+    retry: false,
+  });
+}
+
+export type FacturaLinea = {
+  id: string;
+  factura_id: string;
+  orden: number;
+  descripcion: string | null;
+  codigo_producto: string | null;
+  referencia_proveedor: string | null;
+  cantidad: number | null;
+  precio_unitario: number | null;
+  descuento_tipo: TipoDescuentoLinea | null;
+  descuento_valor: number | null;
+  tipo_impuesto: string | null;
+  nombre_impuesto: string | null;
+  tipo_impositivo: number | null;
+  base_imponible: number | null;
+  cuota_impuesto: number | null;
+  total: number | null;
+  origen_importes: OrigenImportesLinea;
+  observaciones: string | null;
+  estado_linea: EstadoLineaFactura;
+  created_at: string;
+  updated_at: string;
+  entorno: "produccion" | "prueba";
+};
+
+export function useFactura(id: string) {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["factura", id],
+    queryFn: () => obtenerFactura({ data: { id } }),
+    enabled: abierta && !!id,
+    retry: false,
+  });
+}
+
+export function useLineasFactura(facturaId: string, incluirEliminadas = false) {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["factura-lineas", facturaId, incluirEliminadas],
+    queryFn: () => listarLineasFactura({ data: { facturaId, incluirEliminadas } }),
+    enabled: abierta && !!facturaId,
     retry: false,
   });
 }

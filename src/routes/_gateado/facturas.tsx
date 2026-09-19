@@ -245,6 +245,13 @@ function PantallaFacturas() {
                       </Select>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{f.entorno}</TableCell>
+                    <TableCell className="text-right">
+                      <Button asChild size="sm" variant="outline">
+                        <Link to="/facturas/$facturaId" params={{ facturaId: f.id }}>
+                          Abrir ficha
+                        </Link>
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 );
               })}
