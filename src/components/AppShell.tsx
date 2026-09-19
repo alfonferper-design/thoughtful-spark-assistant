@@ -1,9 +1,10 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { MODULOS, moduloDeRuta } from "@/lib/secciones";
 import { useActor } from "@/lib/datos";
+import { bloquearApp } from "@/lib/gate.functions";
 import { Input } from "@/components/ui/input";
-import { Menu, X } from "lucide-react";
+import { Lock, Menu, X } from "lucide-react";
 
 function Navegacion({ onNavegar }: { onNavegar?: () => void }) {
   const ruta = useRouterState({ select: (s) => s.location.pathname });
@@ -111,6 +112,12 @@ export function AppShell({
   const { actor, guardarActor } = useActor();
   const [nombre, setNombre] = useState(actor);
   const [menuMovil, setMenuMovil] = useState(false);
+  const navigate = useNavigate();
+
+  async function bloquear() {
+    await bloquearApp();
+    await navigate({ to: "/unlock" });
+  }
 
   useEffect(() => {
     setNombre(actor);
@@ -162,17 +169,28 @@ export function AppShell({
               )}
             </div>
           </div>
-          <label className="text-xs text-muted-foreground">
-            Responsable de los cambios
-            <Input
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              onBlur={() => {
-                if (nombre.trim() && nombre.trim() !== actor) void guardarActor(nombre.trim());
-              }}
-              className="mt-1 h-8 w-48 text-sm"
-            />
-          </label>
+          <div className="flex items-end gap-2">
+            <label className="text-xs text-muted-foreground">
+              Responsable de los cambios
+              <Input
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                onBlur={() => {
+                  if (nombre.trim() && nombre.trim() !== actor) void guardarActor(nombre.trim());
+                }}
+                className="mt-1 h-8 w-48 text-sm"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => void bloquear()}
+              title="Bloquear la aplicación"
+              aria-label="Bloquear la aplicación"
+              className="rounded-md border border-border p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <Lock className="h-4 w-4" />
+            </button>
+          </div>
         </header>
         <main className="flex-1 px-5 py-6 sm:px-6">{children}</main>
       </div>

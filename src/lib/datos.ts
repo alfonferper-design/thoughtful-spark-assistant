@@ -1,5 +1,12 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  listarAuditoria,
+  listarCategorias,
+  listarCuentas,
+  listarProveedores,
+  obtenerActor,
+  guardarActor as guardarActorFn,
+} from "@/lib/datos.functions";
 
 export type Cuenta = {
   id: string;
@@ -48,85 +55,33 @@ export type RegistroAuditoria = {
   fecha: string;
 };
 
-async function listar<T>(
-  tabla: "cuentas" | "categorias" | "proveedores" | "auditoria",
-  orden: string,
-  ascendente = true,
-) {
-  const { data, error } = await supabase
-    .from(tabla)
-    .select("*")
-    .order(orden, { ascending: ascendente });
-  if (error) throw error;
-  return (data ?? []) as T[];
-}
+// Todas las consultas llaman a funciones de servidor que exigen la sesión
+// desbloqueada con la clave de la aplicación.
 
 export function useCuentas() {
-  return useQuery({ queryKey: ["cuentas"], queryFn: () => listar<Cuenta>("cuentas", "nombre") });
+  return useQuery({ queryKey: ["cuentas"], queryFn: () => listarCuentas() });
 }
 
 export function useCategorias() {
-  return useQuery({
-    queryKey: ["categorias"],
-    queryFn: () => listar<Categoria>("categorias", "nombre"),
-  });
+  return useQuery({ queryKey: ["categorias"], queryFn: () => listarCategorias() });
 }
 
 export function useProveedores() {
-  return useQuery({
-    queryKey: ["proveedores"],
-    queryFn: () => listar<Proveedor>("proveedores", "nombre_visible"),
-  });
+  return useQuery({ queryKey: ["proveedores"], queryFn: () => listarProveedores() });
 }
 
 export function useAuditoria() {
-  return useQuery({
-    queryKey: ["auditoria"],
-    queryFn: () => listar<RegistroAuditoria>("auditoria", "fecha", false),
-  });
+  return useQuery({ queryKey: ["auditoria"], queryFn: () => listarAuditoria() });
 }
 
 export function useActor() {
   const queryClient = useQueryClient();
-  const query = useQuery({
-    queryKey: ["actor"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("configuracion")
-        .select("valor")
-        .eq("clave", "actor")
-        .maybeSingle();
-      if (error) throw error;
-      const valor = (data?.valor ?? {}) as { nombre?: string };
-      return valor.nombre ?? "Alfonso";
-    },
-  });
+  const query = useQuery({ queryKey: ["actor"], queryFn: () => obtenerActor() });
 
   async function guardarActor(nombre: string) {
-    const { error } = await supabase
-      .from("configuracion")
-      .upsert({ clave: "actor", valor: { nombre }, actualizado_en: new Date().toISOString() });
-    if (error) throw error;
+    await guardarActorFn({ data: { nombre } });
     await queryClient.invalidateQueries({ queryKey: ["actor"] });
   }
 
   return { actor: query.data ?? "Alfonso", guardarActor };
-}
-
-export async function registrarAuditoria(params: {
-  entidad: string;
-  entidadId: string | null;
-  accion: string;
-  actor: string;
-  antes?: unknown;
-  despues?: unknown;
-}) {
-  await supabase.from("auditoria").insert({
-    entidad: params.entidad,
-    entidad_id: params.entidadId,
-    accion: params.accion,
-    actor: params.actor,
-    antes: (params.antes ?? null) as never,
-    despues: (params.despues ?? null) as never,
-  });
 }

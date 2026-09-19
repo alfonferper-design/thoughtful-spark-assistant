@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useAuditoria } from "@/lib/datos";
 
-export const Route = createFileRoute("/auditoria")({
+export const Route = createFileRoute("/_gateado/auditoria")({
   head: () => ({
     meta: [
       { title: "Auditoría · Farmatrack" },

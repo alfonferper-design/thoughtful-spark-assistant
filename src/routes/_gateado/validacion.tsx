@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PantallaPendiente } from "@/components/PantallaPendiente";
 
-export const Route = createFileRoute("/validacion")({
+export const Route = createFileRoute("/_gateado/validacion")({
   head: () => ({
     meta: [
       { title: "Validación Fase 2 · Farmatrack" },

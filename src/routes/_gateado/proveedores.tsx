@@ -22,17 +22,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { supabase } from "@/integrations/supabase/client";
-import {
-  useActor,
-  useCategorias,
-  useProveedores,
-  registrarAuditoria,
-  type Proveedor,
-} from "@/lib/datos";
+import { useActor, useCategorias, useProveedores, type Proveedor } from "@/lib/datos";
+import { crearProveedor } from "@/lib/datos.functions";
 import { normalizarNombre } from "@/lib/secciones";
 
-export const Route = createFileRoute("/proveedores")({
+export const Route = createFileRoute("/_gateado/proveedores")({
   head: () => ({
     meta: [
       { title: "Proveedores · Farmatrack" },
@@ -88,33 +82,29 @@ function PantallaProveedores() {
       return;
     }
     setGuardando(true);
-    const datos = {
-      nombre_visible: nombre,
-      nombre_normalizado: norm,
-      tipo: form.tipo,
-      cif: form.cif.trim() || null,
-      telefono: form.telefono.trim() || null,
-      email: form.email.trim() || null,
-      direccion: form.direccion.trim() || null,
-      condiciones_pago: form.condiciones_pago.trim() || null,
-      categoria_defecto_id:
-        form.categoria_defecto_id === "ninguna" ? null : form.categoria_defecto_id,
-      entorno: form.entorno,
-      activo: true,
-    };
-    const { data, error } = await supabase.from("proveedores").insert(datos).select().single();
-    setGuardando(false);
-    if (error) {
-      toast.error("No se pudo crear el proveedor: " + error.message);
+    try {
+      await crearProveedor({
+        data: {
+          nombre_visible: nombre,
+          nombre_normalizado: norm,
+          tipo: form.tipo,
+          cif: form.cif.trim() || null,
+          telefono: form.telefono.trim() || null,
+          email: form.email.trim() || null,
+          direccion: form.direccion.trim() || null,
+          condiciones_pago: form.condiciones_pago.trim() || null,
+          categoria_defecto_id:
+            form.categoria_defecto_id === "ninguna" ? null : form.categoria_defecto_id,
+          entorno: form.entorno,
+          actor,
+        },
+      });
+    } catch (error) {
+      setGuardando(false);
+      toast.error("No se pudo crear el proveedor: " + (error as Error).message);
       return;
     }
-    await registrarAuditoria({
-      entidad: "Proveedor",
-      entidadId: data.id,
-      accion: "crear",
-      actor,
-      despues: datos,
-    });
+    setGuardando(false);
     await queryClient.invalidateQueries({ queryKey: ["proveedores"] });
     await queryClient.invalidateQueries({ queryKey: ["auditoria"] });
     toast.success("Proveedor creado");

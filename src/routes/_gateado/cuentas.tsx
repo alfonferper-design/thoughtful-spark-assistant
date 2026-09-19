@@ -23,11 +23,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-import { useActor, useCuentas, registrarAuditoria, type Cuenta } from "@/lib/datos";
+import { useActor, useCuentas, type Cuenta } from "@/lib/datos";
+import { crearCuenta } from "@/lib/datos.functions";
 import { formatoEuros } from "@/lib/secciones";
 
-export const Route = createFileRoute("/cuentas")({
+export const Route = createFileRoute("/_gateado/cuentas")({
   head: () => ({
     meta: [
       { title: "Cuentas bancarias · Farmatrack" },
@@ -71,27 +71,23 @@ function PantallaCuentas() {
       return;
     }
     setGuardando(true);
-    const datos = {
-      nombre: nombre.trim(),
-      tipo,
-      saldo_apertura: importe,
-      fecha_saldo_apertura: fecha,
-      entorno,
-      activa: true,
-    };
-    const { data, error } = await supabase.from("cuentas").insert(datos).select().single();
-    setGuardando(false);
-    if (error) {
-      toast.error("No se pudo crear la cuenta: " + error.message);
+    try {
+      await crearCuenta({
+        data: {
+          nombre: nombre.trim(),
+          tipo,
+          saldo_apertura: importe,
+          fecha_saldo_apertura: fecha,
+          entorno,
+          actor,
+        },
+      });
+    } catch (error) {
+      setGuardando(false);
+      toast.error("No se pudo crear la cuenta: " + (error as Error).message);
       return;
     }
-    await registrarAuditoria({
-      entidad: "Cuenta",
-      entidadId: data.id,
-      accion: "crear",
-      actor,
-      despues: datos,
-    });
+    setGuardando(false);
     await queryClient.invalidateQueries({ queryKey: ["cuentas"] });
     await queryClient.invalidateQueries({ queryKey: ["auditoria"] });
     toast.success("Cuenta creada");

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCuentas, useCategorias, useProveedores } from "@/lib/datos";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_gateado/")({
   head: () => ({
     meta: [
       { title: "Configuración inicial · Farmatrack" },
