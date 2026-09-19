@@ -133,6 +133,95 @@ export type Database = {
         }
         Relationships: []
       }
+      factura_lineas: {
+        Row: {
+          base_imponible: number | null
+          cantidad: number | null
+          codigo_producto: string | null
+          created_at: string
+          cuota_impuesto: number | null
+          descripcion: string | null
+          descuento_tipo:
+            | Database["public"]["Enums"]["linea_descuento_tipo"]
+            | null
+          descuento_valor: number | null
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          estado_linea: Database["public"]["Enums"]["linea_estado"]
+          factura_id: string
+          id: string
+          nombre_impuesto: string | null
+          observaciones: string | null
+          orden: number
+          origen_importes: Database["public"]["Enums"]["linea_origen_importes"]
+          precio_unitario: number | null
+          referencia_proveedor: string | null
+          tipo_impositivo: number | null
+          tipo_impuesto: string | null
+          total: number | null
+          updated_at: string
+        }
+        Insert: {
+          base_imponible?: number | null
+          cantidad?: number | null
+          codigo_producto?: string | null
+          created_at?: string
+          cuota_impuesto?: number | null
+          descripcion?: string | null
+          descuento_tipo?:
+            | Database["public"]["Enums"]["linea_descuento_tipo"]
+            | null
+          descuento_valor?: number | null
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          estado_linea?: Database["public"]["Enums"]["linea_estado"]
+          factura_id: string
+          id?: string
+          nombre_impuesto?: string | null
+          observaciones?: string | null
+          orden: number
+          origen_importes?: Database["public"]["Enums"]["linea_origen_importes"]
+          precio_unitario?: number | null
+          referencia_proveedor?: string | null
+          tipo_impositivo?: number | null
+          tipo_impuesto?: string | null
+          total?: number | null
+          updated_at?: string
+        }
+        Update: {
+          base_imponible?: number | null
+          cantidad?: number | null
+          codigo_producto?: string | null
+          created_at?: string
+          cuota_impuesto?: number | null
+          descripcion?: string | null
+          descuento_tipo?:
+            | Database["public"]["Enums"]["linea_descuento_tipo"]
+            | null
+          descuento_valor?: number | null
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          estado_linea?: Database["public"]["Enums"]["linea_estado"]
+          factura_id?: string
+          id?: string
+          nombre_impuesto?: string | null
+          observaciones?: string | null
+          orden?: number
+          origen_importes?: Database["public"]["Enums"]["linea_origen_importes"]
+          precio_unitario?: number | null
+          referencia_proveedor?: string | null
+          tipo_impositivo?: number | null
+          tipo_impuesto?: string | null
+          total?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "factura_lineas_factura_id_fkey"
+            columns: ["factura_id"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       facturas: {
         Row: {
           base_imponible: number | null
@@ -340,6 +429,9 @@ export type Database = {
         | "Duplicado confirmado"
         | "Falso positivo"
       factura_tipo: "Normal" | "Rectificativa" | "Abono"
+      linea_descuento_tipo: "Porcentual" | "Absoluto"
+      linea_estado: "Activa" | "Eliminada"
+      linea_origen_importes: "formula" | "documento"
       proveedor_tipo: "Cooperativa" | "Mayorista" | "Laboratorio" | "Servicio"
     }
     CompositeTypes: {
@@ -490,6 +582,9 @@ export const Constants = {
         "Falso positivo",
       ],
       factura_tipo: ["Normal", "Rectificativa", "Abono"],
+      linea_descuento_tipo: ["Porcentual", "Absoluto"],
+      linea_estado: ["Activa", "Eliminada"],
+      linea_origen_importes: ["formula", "documento"],
       proveedor_tipo: ["Cooperativa", "Mayorista", "Laboratorio", "Servicio"],
     },
   },

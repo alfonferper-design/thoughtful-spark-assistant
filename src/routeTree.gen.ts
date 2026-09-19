@@ -30,6 +30,7 @@ import { Route as GateadoSnapshotsRouteImport } from './routes/_gateado/snapshot
 import { Route as GateadoTransferenciasRouteImport } from './routes/_gateado/transferencias'
 import { Route as GateadoValidacionRouteImport } from './routes/_gateado/validacion'
 import { Route as GateadoVencimientosRouteImport } from './routes/_gateado/vencimientos'
+import { Route as GateadoFacturasFacturaIdRouteImport } from './routes/_gateado/facturas_.$facturaId'
 import { Route as GateadoFacturasNuevaRouteImport } from './routes/_gateado/facturas_.nueva'
 
 const GateadoRouteRoute = GateadoRouteRouteImport.update({
@@ -136,6 +137,12 @@ const GateadoVencimientosRoute = GateadoVencimientosRouteImport.update({
   path: '/vencimientos',
   getParentRoute: () => GateadoRouteRoute,
 } as any)
+const GateadoFacturasFacturaIdRoute =
+  GateadoFacturasFacturaIdRouteImport.update({
+    id: '/facturas_/$facturaId',
+    path: '/facturas/$facturaId',
+    getParentRoute: () => GateadoRouteRoute,
+  } as any)
 const GateadoFacturasNuevaRoute = GateadoFacturasNuevaRouteImport.update({
   id: '/facturas_/nueva',
   path: '/facturas/nueva',
@@ -163,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/transferencias': typeof GateadoTransferenciasRoute
   '/validacion': typeof GateadoValidacionRoute
   '/vencimientos': typeof GateadoVencimientosRoute
+  '/facturas/$facturaId': typeof GateadoFacturasFacturaIdRoute
   '/facturas/nueva': typeof GateadoFacturasNuevaRoute
 }
 export interface FileRoutesByTo {
@@ -186,6 +194,7 @@ export interface FileRoutesByTo {
   '/validacion': typeof GateadoValidacionRoute
   '/vencimientos': typeof GateadoVencimientosRoute
   '/': typeof GateadoIndexRoute
+  '/facturas/$facturaId': typeof GateadoFacturasFacturaIdRoute
   '/facturas/nueva': typeof GateadoFacturasNuevaRoute
 }
 export interface FileRoutesById {
@@ -211,6 +220,7 @@ export interface FileRoutesById {
   '/_gateado/validacion': typeof GateadoValidacionRoute
   '/_gateado/vencimientos': typeof GateadoVencimientosRoute
   '/_gateado/': typeof GateadoIndexRoute
+  '/_gateado/facturas_/$facturaId': typeof GateadoFacturasFacturaIdRoute
   '/_gateado/facturas_/nueva': typeof GateadoFacturasNuevaRoute
 }
 export interface FileRouteTypes {
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/transferencias'
     | '/validacion'
     | '/vencimientos'
+    | '/facturas/$facturaId'
     | '/facturas/nueva'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/validacion'
     | '/vencimientos'
     | '/'
+    | '/facturas/$facturaId'
     | '/facturas/nueva'
   id:
     | '__root__'
@@ -283,6 +295,7 @@ export interface FileRouteTypes {
     | '/_gateado/validacion'
     | '/_gateado/vencimientos'
     | '/_gateado/'
+    | '/_gateado/facturas_/$facturaId'
     | '/_gateado/facturas_/nueva'
   fileRoutesById: FileRoutesById
 }
@@ -440,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GateadoVencimientosRouteImport
       parentRoute: typeof GateadoRouteRoute
     }
+    '/_gateado/facturas_/$facturaId': {
+      id: '/_gateado/facturas_/$facturaId'
+      path: '/facturas/$facturaId'
+      fullPath: '/facturas/$facturaId'
+      preLoaderRoute: typeof GateadoFacturasFacturaIdRouteImport
+      parentRoute: typeof GateadoRouteRoute
+    }
     '/_gateado/facturas_/nueva': {
       id: '/_gateado/facturas_/nueva'
       path: '/facturas/nueva'
@@ -470,6 +490,7 @@ interface GateadoRouteRouteChildren {
   GateadoValidacionRoute: typeof GateadoValidacionRoute
   GateadoVencimientosRoute: typeof GateadoVencimientosRoute
   GateadoIndexRoute: typeof GateadoIndexRoute
+  GateadoFacturasFacturaIdRoute: typeof GateadoFacturasFacturaIdRoute
   GateadoFacturasNuevaRoute: typeof GateadoFacturasNuevaRoute
 }
 
@@ -493,6 +514,7 @@ const GateadoRouteRouteChildren: GateadoRouteRouteChildren = {
   GateadoValidacionRoute: GateadoValidacionRoute,
   GateadoVencimientosRoute: GateadoVencimientosRoute,
   GateadoIndexRoute: GateadoIndexRoute,
+  GateadoFacturasFacturaIdRoute: GateadoFacturasFacturaIdRoute,
   GateadoFacturasNuevaRoute: GateadoFacturasNuevaRoute,
 }
 

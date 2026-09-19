@@ -122,6 +122,7 @@ function PantallaFacturas() {
                 <TableHead>Duplicado</TableHead>
                 <TableHead>Contable</TableHead>
                 <TableHead>Entorno</TableHead>
+                <TableHead className="text-right">Ficha</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -245,6 +246,13 @@ function PantallaFacturas() {
                       </Select>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{f.entorno}</TableCell>
+                    <TableCell className="text-right">
+                      <Button asChild size="sm" variant="outline">
+                        <Link to="/facturas/$facturaId" params={{ facturaId: f.id }}>
+                          Abrir ficha
+                        </Link>
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 );
               })}
