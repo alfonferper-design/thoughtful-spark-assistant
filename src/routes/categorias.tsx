@@ -34,7 +34,7 @@ export const Route = createFileRoute("/categorias")({
       },
     ],
   }),
-  component: PantallaCategorias;
+  component: PantallaCategorias,
 });
 
 function PantallaCategorias() {
