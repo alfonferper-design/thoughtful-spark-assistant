@@ -452,3 +452,145 @@ export function mensajeExcesoConciliacion(v: ResultadoValidacionConciliacion) {
   }
   return `Sobre-conciliación no autorizada: ${partes.join(" y ")}.`;
 }
+
+// ---------- F-35 ----------
+
+export type ResumenPagosGlobal = {
+  numFacturasOriginales: number;
+  pendientes: number;
+  parciales: number;
+  pagadas: number;
+  conSaldoAFavor: number;
+  sinVencimiento: number;
+  anuladas: number;
+  deudaPendienteTotal: number;
+  saldoAFavorTotal: number;
+  incoherencias: number;
+  vencimientosProximos: number;
+  importeVencimientosProximos: number;
+};
+
+/**
+ * F-35 · resumenPagosGlobal — agregado global para el Dashboard, una sola
+ * fuente para todas las cifras de pago. Itera SOLO sobre facturas originales
+ * (`!esDocumentoRelacionado`) y usa la versión de FAMILIA, nunca la de
+ * documento. Nada de esto se guarda (RB-017).
+ */
+export function resumenPagosGlobal(ctx: ContextoPagos, hoyISO?: string): ResumenPagosGlobal {
+  const hoy = hoyISO ?? new Date().toISOString().slice(0, 10);
+  const limite = new Date(`${hoy}T00:00:00Z`);
+  limite.setUTCDate(limite.getUTCDate() + 30);
+  const hasta = limite.toISOString().slice(0, 10);
+
+  const originales = ctx.facturas.filter((f) => !esDocumentoRelacionado(f));
+  const resumen: ResumenPagosGlobal = {
+    numFacturasOriginales: originales.length,
+    pendientes: 0,
+    parciales: 0,
+    pagadas: 0,
+    conSaldoAFavor: 0,
+    sinVencimiento: 0,
+    anuladas: 0,
+    deudaPendienteTotal: 0,
+    saldoAFavorTotal: 0,
+    incoherencias: 0,
+    vencimientosProximos: 0,
+    importeVencimientosProximos: 0,
+  };
+
+  for (const f of originales) {
+    const p = posicionPagoFactura(f.id, ctx);
+    const estado = estadoPagoFamiliaFactura(f.id, ctx);
+    if (estado === "Pendiente") resumen.pendientes += 1;
+    else if (estado === "Parcialmente pagada") resumen.parciales += 1;
+    else if (estado === "Pagada") resumen.pagadas += 1;
+    else if (estado === "Pagada con saldo a favor") {
+      // "Pagadas" incluye también las pagadas con saldo a favor, que además
+      // incrementan su propio contador.
+      resumen.pagadas += 1;
+      resumen.conSaldoAFavor += 1;
+    } else if (estado === "Sin vencimiento registrado") resumen.sinVencimiento += 1;
+    else if (estado === "Anulada") resumen.anuladas += 1;
+
+    if (p) {
+      resumen.deudaPendienteTotal = redondearEuros(
+        resumen.deudaPendienteTotal + (p.deudaPendiente ?? 0),
+      );
+      resumen.saldoAFavorTotal = redondearEuros(resumen.saldoAFavorTotal + (p.saldoAFavor ?? 0));
+      if ((p.excesoAjusteNoRespaldado ?? 0) > TOLERANCIA_REDONDEO_EUR) resumen.incoherencias += 1;
+    }
+  }
+
+  for (const v of ctx.vencimientos) {
+    if (v.estado !== "Previsto" && v.estado !== "Pendiente") continue;
+    if (v.fecha > hasta) continue;
+    const pendiente = redondearEuros(
+      Math.max(0, Number(v.importe) - vencimientoYaConciliado(v.id, ctx)),
+    );
+    resumen.vencimientosProximos += 1;
+    resumen.importeVencimientosProximos = redondearEuros(
+      resumen.importeVencimientosProximos + pendiente,
+    );
+  }
+
+  return resumen;
+}
+
+/** Mensaje literal del KPI 9 de la Parte 8 (incoherencias visibles, nunca ocultas). */
+export const MENSAJE_INCOHERENCIAS =
+  "factura(s) con un ajuste (abono/rectificativa) superior a su obligación y a sus pagos — revísalas: no se ha absorbido ni compensado nada automáticamente.";
+
+// ---------- F-25 / F-26 ----------
+
+/** F-25 · posicionNetaFactura: suma algebraica, con signo, de toda la familia (RB-009). */
+export function posicionNetaFactura(facturaId: string, ctx: ContextoPagos): number | null {
+  const familia = familiaDocumentalFactura(facturaId, ctx);
+  if (!familia.original || familia.cicloDetectado) return null;
+  return redondearEuros(
+    [familia.original, ...familia.ajustes].reduce((s, f) => s + Number(f.total), 0),
+  );
+}
+
+// ---------- 3.6 · validación de una nueva relación documental ----------
+
+export const MENSAJE_CICLO = "Referencia circular detectada en la cadena de facturas relacionadas.";
+export const MENSAJE_CADENA_PROFUNDA =
+  "La cadena de facturas relacionadas es demasiado profunda o corrupta.";
+export const MENSAJE_NORMAL_CON_PADRE =
+  "Una factura Normal no puede apuntar a otra factura relacionada.";
+export const MENSAJE_FALTA_PADRE =
+  "Una Rectificativa o un Abono exige la factura a la que corrige.";
+export const MENSAJE_PADRE_NO_EXISTE = "La factura relacionada indicada no existe.";
+
+/**
+ * 3.6 punto 5/6 · validarNuevaRelacionFactura. Recorre la cadena ascendente del
+ * padre propuesto con un Set de visitados y un límite de profundidad de 200.
+ */
+export function validarNuevaRelacionFactura(
+  tipoFactura: string,
+  facturaRelacionadaId: string | null,
+  ctx: ContextoPagos,
+): { ok: boolean; error?: string } {
+  if (tipoFactura === "Normal") {
+    return facturaRelacionadaId ? { ok: false, error: MENSAJE_NORMAL_CON_PADRE } : { ok: true };
+  }
+  if (!facturaRelacionadaId) return { ok: false, error: MENSAJE_FALTA_PADRE };
+  const padre = ctx.facturas.find((f) => f.id === facturaRelacionadaId);
+  if (!padre) return { ok: false, error: MENSAJE_PADRE_NO_EXISTE };
+
+  const visitados = new Set<string>();
+  let actual: FacturaPagos | undefined = padre;
+  let profundidad = 0;
+  while (actual) {
+    if (visitados.has(actual.id)) return { ok: false, error: MENSAJE_CICLO };
+    visitados.add(actual.id);
+    profundidad += 1;
+    if (profundidad > LIMITE_PROFUNDIDAD_CADENA) {
+      return { ok: false, error: MENSAJE_CADENA_PROFUNDA };
+    }
+    if (!actual.factura_relacionada_id) break;
+    if (actual.factura_relacionada_id === actual.id) return { ok: false, error: MENSAJE_CICLO };
+    actual = ctx.facturas.find((f) => f.id === actual!.factura_relacionada_id);
+  }
+  return { ok: true };
+}
