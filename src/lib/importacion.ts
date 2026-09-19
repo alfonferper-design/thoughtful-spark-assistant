@@ -175,28 +175,28 @@ export function prepararVistaPrevia(
       });
     } else {
       // Orden posicional documentado al usuario: fecha, importe, tipo, cuenta, concepto.
-      crudo.fecha = celdas[0] ?? "";
-      crudo.importe = celdas[1] ?? "";
-      crudo.tipo = celdas[2] ?? "";
-      crudo.cuenta = celdas[3] ?? "";
-      crudo.concepto = celdas[4] ?? "";
+      crudo['fecha'] = celdas[0] ?? "";
+      crudo['importe'] = celdas[1] ?? "";
+      crudo['tipo'] = celdas[2] ?? "";
+      crudo['cuenta'] = celdas[3] ?? "";
+      crudo['concepto'] = celdas[4] ?? "";
     }
 
     const errores: string[] = [];
     const avisos: string[] = [];
-    const fecha = crudo.fecha ? normalizarFecha(crudo.fecha) : null;
+    const fecha = crudo['fecha'] ? normalizarFecha(crudo['fecha']) : null;
     if (!fecha) errores.push("Fecha no reconocida.");
 
-    const importeCrudo = crudo.importe ? normalizarImporte(crudo.importe) : null;
+    const importeCrudo = crudo['importe'] ? normalizarImporte(crudo['importe']) : null;
     if (importeCrudo === null) errores.push("Importe no reconocido.");
     else if (Math.abs(importeCrudo) === 0) errores.push("El importe no puede ser cero.");
 
-    const { tipo, deducido } = normalizarTipo(crudo.tipo ?? null, importeCrudo);
+    const { tipo, deducido } = normalizarTipo(crudo['tipo'] ?? null, importeCrudo);
     if (!tipo) errores.push("Tipo no reconocido (Ingreso, Gasto o Financiación).");
     else if (deducido) {
       avisos.push(
-        crudo.tipo
-          ? `Tipo interpretado como ${tipo} a partir de "${crudo.tipo}".`
+        crudo['tipo']
+          ? `Tipo interpretado como ${tipo} a partir de "${crudo['tipo']}".`
           : `Tipo deducido como ${tipo} por el signo del importe.`,
       );
     }
@@ -205,7 +205,7 @@ export function prepararVistaPrevia(
     }
 
     let cuenta_id: string | null = null;
-    const nombreCuenta = (crudo.cuenta ?? "").trim();
+    const nombreCuenta = (crudo['cuenta'] ?? "").trim();
     if (nombreCuenta) {
       const encontrada = cuentas.find((c) => sinAcentos(c.nombre) === sinAcentos(nombreCuenta));
       if (encontrada) cuenta_id = encontrada.id;
@@ -220,8 +220,8 @@ export function prepararVistaPrevia(
       importe: importeCrudo === null ? null : Math.abs(importeCrudo),
       tipo,
       cuenta: nombreCuenta || null,
-      concepto: (crudo.concepto ?? "").trim() || null,
-      metodo: normalizarMetodo(crudo.metodo ?? null),
+      concepto: (crudo['concepto'] ?? "").trim() || null,
+      metodo: normalizarMetodo(crudo['metodo'] ?? null),
       cuenta_id,
       errores,
       avisos,

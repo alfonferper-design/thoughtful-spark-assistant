@@ -221,15 +221,15 @@ export function diferenciasPorCuenta(
 // ---------- F-07 ----------
 
 export type FiltrosMovimientos = {
-  tipos?: string[];
-  desde?: string;
-  hasta?: string;
-  cuentaId?: string;
-  categoriaId?: string;
-  proveedorId?: string;
-  metodo?: string;
-  relacionado?: boolean | "todos";
-  entorno?: string;
+  tipos?: string[] | undefined;
+  desde?: string | undefined;
+  hasta?: string | undefined;
+  cuentaId?: string | undefined;
+  categoriaId?: string | undefined;
+  proveedorId?: string | undefined;
+  metodo?: string | undefined;
+  relacionado?: boolean | "todos" | undefined;
+  entorno?: string | undefined;
 };
 
 /**
