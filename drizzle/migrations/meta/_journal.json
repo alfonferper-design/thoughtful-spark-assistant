@@ -57,6 +57,13 @@
       "when": 1789826689253,
       "tag": "0007_create_conciliaciones",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789827829117,
+      "tag": "0008_create_transferencias_snapshots",
+      "breakpoints": true
     }
   ]
 }

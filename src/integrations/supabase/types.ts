@@ -647,6 +647,103 @@ export type Database = {
           },
         ]
       }
+      snapshots: {
+        Row: {
+          created_at: string
+          cuenta_id: string
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          fecha: string
+          id: string
+          origen: Database["public"]["Enums"]["snapshot_origen"]
+          saldo_comunicado_banco: number
+        }
+        Insert: {
+          created_at?: string
+          cuenta_id: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          fecha: string
+          id?: string
+          origen?: Database["public"]["Enums"]["snapshot_origen"]
+          saldo_comunicado_banco: number
+        }
+        Update: {
+          created_at?: string
+          cuenta_id?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          fecha?: string
+          id?: string
+          origen?: Database["public"]["Enums"]["snapshot_origen"]
+          saldo_comunicado_banco?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snapshots_cuenta_id_fkey"
+            columns: ["cuenta_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transferencias: {
+        Row: {
+          created_at: string
+          cuenta_destino_id: string
+          cuenta_origen_id: string
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          id: string
+          movimiento_destino_id: string
+          movimiento_origen_id: string
+        }
+        Insert: {
+          created_at?: string
+          cuenta_destino_id: string
+          cuenta_origen_id: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          id?: string
+          movimiento_destino_id: string
+          movimiento_origen_id: string
+        }
+        Update: {
+          created_at?: string
+          cuenta_destino_id?: string
+          cuenta_origen_id?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          id?: string
+          movimiento_destino_id?: string
+          movimiento_origen_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transferencias_cuenta_destino_id_fkey"
+            columns: ["cuenta_destino_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_cuenta_origen_id_fkey"
+            columns: ["cuenta_origen_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_movimiento_destino_id_fkey"
+            columns: ["movimiento_destino_id"]
+            isOneToOne: false
+            referencedRelation: "movimientos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_movimiento_origen_id_fkey"
+            columns: ["movimiento_origen_id"]
+            isOneToOne: false
+            referencedRelation: "movimientos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vencimientos: {
         Row: {
           compromiso_fijo_id: string | null
@@ -699,6 +796,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      crear_transferencia: {
+        Args: {
+          p_actor: string
+          p_cuenta_destino: string
+          p_cuenta_origen: string
+          p_entorno: Database["public"]["Enums"]["entorno_tipo"]
+          p_estado: Database["public"]["Enums"]["movimiento_estado"]
+          p_fecha: string
+          p_importe: number
+        }
+        Returns: Json
+      }
       registrar_conciliacion: {
         Args: {
           p_actor: string
@@ -754,6 +863,7 @@ export type Database = {
         | "Financiación"
         | "Transferencia interna"
       proveedor_tipo: "Cooperativa" | "Mayorista" | "Laboratorio" | "Servicio"
+      snapshot_origen: "Manual" | "Importado"
       vencimiento_clase: "Pago" | "Cobro"
       vencimiento_estado: "Previsto" | "Pendiente" | "Pagado"
       vencimiento_tipo:
@@ -933,6 +1043,7 @@ export const Constants = {
         "Transferencia interna",
       ],
       proveedor_tipo: ["Cooperativa", "Mayorista", "Laboratorio", "Servicio"],
+      snapshot_origen: ["Manual", "Importado"],
       vencimiento_clase: ["Pago", "Cobro"],
       vencimiento_estado: ["Previsto", "Pendiente", "Pagado"],
       vencimiento_tipo: [
