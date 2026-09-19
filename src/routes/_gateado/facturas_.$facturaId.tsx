@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/AppShell";
+import { PanelDocumentoFactura } from "@/components/PanelDocumentoFactura";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -235,7 +236,7 @@ function PantallaFicha() {
   return (
     <AppShell
       titulo="Ficha de factura"
-      descripcion="Desglose por líneas de la factura. El resto de paneles llegará en etapas posteriores."
+      descripcion="Desglose por líneas y documento adjunto de la factura. El resto de paneles llegará en etapas posteriores."
       acciones={
         <Button asChild size="sm" variant="outline">
           <Link to="/facturas">Volver al listado</Link>
@@ -259,6 +260,8 @@ function PantallaFicha() {
               <Dato etiqueta="Entorno" valor={factura.entorno} />
             </CardContent>
           </Card>
+
+          <PanelDocumentoFactura facturaId={facturaId} actor={actor} />
 
           <Card className="mb-6">
             <CardHeader className="flex flex-row items-center justify-between gap-4 pb-3">

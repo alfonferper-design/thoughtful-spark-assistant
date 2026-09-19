@@ -133,6 +133,62 @@ export type Database = {
         }
         Relationships: []
       }
+      documentos: {
+        Row: {
+          actor: string
+          created_at: string
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          estado_documento: Database["public"]["Enums"]["documento_estado"]
+          factura_id: string
+          fecha_incorporacion: string
+          hash_sha256: string
+          id: string
+          nombre_original: string
+          referencia_almacenamiento: string
+          tamano_bytes: number
+          tipo_mime: string
+          updated_at: string
+        }
+        Insert: {
+          actor?: string
+          created_at?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          estado_documento?: Database["public"]["Enums"]["documento_estado"]
+          factura_id: string
+          fecha_incorporacion?: string
+          hash_sha256: string
+          id?: string
+          nombre_original: string
+          referencia_almacenamiento: string
+          tamano_bytes: number
+          tipo_mime: string
+          updated_at?: string
+        }
+        Update: {
+          actor?: string
+          created_at?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          estado_documento?: Database["public"]["Enums"]["documento_estado"]
+          factura_id?: string
+          fecha_incorporacion?: string
+          hash_sha256?: string
+          id?: string
+          nombre_original?: string
+          referencia_almacenamiento?: string
+          tamano_bytes?: number
+          tipo_mime?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentos_factura_id_fkey"
+            columns: ["factura_id"]
+            isOneToOne: false
+            referencedRelation: "facturas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       factura_lineas: {
         Row: {
           base_imponible: number | null
@@ -415,6 +471,7 @@ export type Database = {
         | "Cuenta corriente"
         | "Línea de crédito"
         | "Cuenta de inversión"
+      documento_estado: "Activo" | "Sustituido"
       entorno_tipo: "produccion" | "prueba"
       factura_estado_contable: "Pendiente" | "Contabilizada" | "Revisada"
       factura_estado_documental:
@@ -566,6 +623,7 @@ export const Constants = {
         "Línea de crédito",
         "Cuenta de inversión",
       ],
+      documento_estado: ["Activo", "Sustituido"],
       entorno_tipo: ["produccion", "prueba"],
       factura_estado_contable: ["Pendiente", "Contabilizada", "Revisada"],
       factura_estado_documental: [
