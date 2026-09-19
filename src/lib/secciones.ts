@@ -1,62 +1,83 @@
-export const GRUPOS = [
+export type Subruta = { path: string; label: string; listo: boolean };
+export type Modulo = {
+  id: string;
+  label: string;
+  path: string;
+  descripcion: string;
+  hijos: Subruta[];
+};
+
+/**
+ * Navegación por tareas (Etapa 1 UX).
+ * Ninguna ruta existente se elimina: todas siguen accesibles desde su módulo.
+ */
+export const MODULOS: Modulo[] = [
   {
-    grupo: "Configuración",
-    items: [
-      { path: "/", label: "Configuración inicial", listo: true },
-      { path: "/diagnostico", label: "Diagnóstico", listo: false },
+    id: "inicio",
+    label: "Inicio",
+    path: "/",
+    descripcion: "Estado general y puesta en marcha",
+    hijos: [],
+  },
+  {
+    id: "facturas",
+    label: "Facturas",
+    path: "/facturas",
+    descripcion: "Compras, vencimientos y pagos",
+    hijos: [
+      { path: "/facturas", label: "Todas las facturas", listo: false },
+      { path: "/ficha", label: "Ficha de factura", listo: false },
+      { path: "/vencimientos", label: "Vencimientos", listo: false },
+      { path: "/compromisos", label: "Compromisos fijos", listo: false },
     ],
   },
   {
-    grupo: "Panel de control",
-    items: [
-      { path: "/dashboard", label: "Dashboard", listo: false },
-      { path: "/comparativa", label: "Comparativa", listo: false },
-      { path: "/informes", label: "Informes", listo: false },
-    ],
-  },
-  {
-    grupo: "Maestros",
-    items: [
-      { path: "/cuentas", label: "Cuentas", listo: true },
-      { path: "/categorias", label: "Categorías", listo: true },
-      { path: "/proveedores", label: "Proveedores", listo: true },
-    ],
-  },
-  {
-    grupo: "Tesorería",
-    items: [
+    id: "tesoreria",
+    label: "Tesorería",
+    path: "/movimientos",
+    descripcion: "Cuentas, movimientos y conciliación",
+    hijos: [
       { path: "/movimientos", label: "Movimientos", listo: false },
+      { path: "/cuentas", label: "Cuentas", listo: true },
       { path: "/transferencias", label: "Transferencias", listo: false },
       { path: "/snapshots", label: "Saldo bancario", listo: false },
       { path: "/conciliaciones", label: "Conciliación", listo: false },
     ],
   },
   {
-    grupo: "Facturación",
-    items: [
-      { path: "/facturas", label: "Facturas", listo: false },
-      { path: "/ficha", label: "Ficha de factura", listo: false },
+    id: "analisis",
+    label: "Análisis",
+    path: "/dashboard",
+    descripcion: "Resultados, comparativas e informes",
+    hijos: [
+      { path: "/dashboard", label: "Resumen", listo: false },
+      { path: "/comparativa", label: "Comparativa", listo: false },
+      { path: "/informes", label: "Informes", listo: false },
     ],
   },
   {
-    grupo: "Compromisos",
-    items: [
-      { path: "/compromisos", label: "Compromisos fijos", listo: false },
-      { path: "/vencimientos", label: "Vencimientos", listo: false },
-    ],
-  },
-  {
-    grupo: "Trazabilidad",
-    items: [{ path: "/auditoria", label: "Auditoría", listo: true }],
-  },
-  {
-    grupo: "Sistema",
-    items: [
+    id: "configuracion",
+    label: "Configuración",
+    path: "/categorias",
+    descripcion: "Maestros, trazabilidad y mantenimiento",
+    hijos: [
+      { path: "/categorias", label: "Categorías", listo: true },
+      { path: "/proveedores", label: "Proveedores", listo: true },
+      { path: "/auditoria", label: "Auditoría", listo: true },
+      { path: "/diagnostico", label: "Diagnóstico", listo: false },
       { path: "/backup", label: "Backup / Exportación", listo: false },
       { path: "/validacion", label: "Validación Fase 2", listo: false },
     ],
   },
-] as const;
+];
+
+export function moduloDeRuta(ruta: string) {
+  if (ruta === "/") return "inicio";
+  const encontrado = MODULOS.find((m) =>
+    m.hijos.some((h) => ruta === h.path || ruta.startsWith(`${h.path}/`)),
+  );
+  return encontrado?.id ?? "inicio";
+}
 
 export function normalizarNombre(nombre: string) {
   return nombre
