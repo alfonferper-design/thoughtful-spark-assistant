@@ -19,7 +19,7 @@ import { useActor, useCategorias, useProveedores } from "@/lib/datos";
 import { crearFacturaNormal } from "@/lib/datos.functions";
 import { NATURALEZAS_SUGERIDAS } from "@/lib/listas-factura";
 
-export const Route = createFileRoute("/_gateado/facturas/nueva")({
+export const Route = createFileRoute("/_gateado/facturas_/nueva")({
   head: () => ({
     meta: [
       { title: "Nueva factura · Farmatrack" },

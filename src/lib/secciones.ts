@@ -25,7 +25,8 @@ export const MODULOS: Modulo[] = [
     path: "/facturas",
     descripcion: "Compras, vencimientos y pagos",
     hijos: [
-      { path: "/facturas", label: "Todas las facturas", listo: false },
+      { path: "/facturas", label: "Todas las facturas", listo: true },
+      { path: "/facturas/nueva", label: "Nueva factura", listo: true },
       { path: "/ficha", label: "Ficha de factura", listo: false },
       { path: "/vencimientos", label: "Vencimientos", listo: false },
       { path: "/compromisos", label: "Compromisos fijos", listo: false },
