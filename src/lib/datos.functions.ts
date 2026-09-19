@@ -395,3 +395,332 @@ export const resolverDuplicadoFactura = createServerFn({ method: "POST" })
     });
     return { ok: true as const };
   });
+
+// ---------- FacturaLinea (Partes 2.7 y 3.7) ----------
+
+const descuentoTipoSchema = z.enum(["Porcentual", "Absoluto"]).nullable();
+
+const camposLineaSchema = z.object({
+  descripcion: z.string().nullable().optional(),
+  codigo_producto: z.string().nullable().optional(),
+  referencia_proveedor: z.string().nullable().optional(),
+  cantidad: z.number().nullable().optional(),
+  precio_unitario: z.number().nullable().optional(),
+  descuento_tipo: descuentoTipoSchema.optional(),
+  descuento_valor: z.number().nullable().optional(),
+  tipo_impuesto: z.string().nullable().optional(),
+  nombre_impuesto: z.string().nullable().optional(),
+  tipo_impositivo: z.number().nullable().optional(),
+  base_imponible: z.number().nullable().optional(),
+  cuota_impuesto: z.number().nullable().optional(),
+  total: z.number().nullable().optional(),
+  observaciones: z.string().nullable().optional(),
+});
+
+export const obtenerFactura = createServerFn({ method: "GET" })
+  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    return await leerFactura(admin, data.id);
+  });
+
+/** lineasDeFactura(facturaId, ctx, incluirEliminadas=false) — Parte 3.7. */
+export const listarLineasFactura = createServerFn({ method: "GET" })
+  .inputValidator((data) =>
+    z
+      .object({ facturaId: z.string().uuid(), incluirEliminadas: z.boolean().optional() })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    let consulta = admin
+      .from("factura_lineas")
+      .select("*")
+      .eq("factura_id", data.facturaId)
+      .order("orden");
+    if (!data.incluirEliminadas) consulta = consulta.eq("estado_linea", "Activa");
+    const { data: filas, error } = await consulta;
+    if (error) throw new Error(error.message);
+    return filas ?? [];
+  });
+
+async function leerLinea(admin: Admin, id: string) {
+  const { data, error } = await admin.from("factura_lineas").select("*").eq("id", id).single();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+function numeroOnull(v: unknown): number | null {
+  return v === null || v === undefined ? null : Number(v);
+}
+
+/** crearLineaFactura — orden autoasignado, origen_importes según Parte 3.7. */
+export const crearLineaFactura = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    camposLineaSchema
+      .extend({ facturaId: z.string().uuid(), actor: actorSchema })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const { calcularLineaFactura } = await import("./lineas-factura");
+    const admin = await adminAutorizado();
+    const factura = await leerFactura(admin, data.facturaId);
+    const { facturaId, actor, ...datos } = data;
+
+    const { data: ultimas, error: errorOrden } = await admin
+      .from("factura_lineas")
+      .select("orden")
+      .eq("factura_id", facturaId)
+      .order("orden", { ascending: false })
+      .limit(1);
+    if (errorOrden) throw new Error(errorOrden.message);
+    const orden = (ultimas?.[0]?.orden ?? 0) + 1;
+
+    const traeImportes =
+      datos.base_imponible != null || datos.cuota_impuesto != null || datos.total != null;
+    const calculada = calcularLineaFactura({
+      cantidad: datos.cantidad ?? null,
+      precio_unitario: datos.precio_unitario ?? null,
+      descuento_tipo: datos.descuento_tipo ?? null,
+      descuento_valor: datos.descuento_valor ?? null,
+      tipo_impositivo: datos.tipo_impositivo ?? null,
+      base_imponible: datos.base_imponible ?? null,
+      cuota_impuesto: datos.cuota_impuesto ?? null,
+      total: datos.total ?? null,
+    });
+
+    const fila = {
+      factura_id: facturaId,
+      orden,
+      descripcion: datos.descripcion ?? null,
+      codigo_producto: datos.codigo_producto ?? null,
+      referencia_proveedor: datos.referencia_proveedor ?? null,
+      cantidad: datos.cantidad ?? null,
+      precio_unitario: datos.precio_unitario ?? null,
+      descuento_tipo: datos.descuento_tipo ?? null,
+      descuento_valor: datos.descuento_valor ?? null,
+      tipo_impuesto: datos.tipo_impuesto ?? null,
+      nombre_impuesto: datos.nombre_impuesto ?? datos.tipo_impuesto ?? null,
+      tipo_impositivo: datos.tipo_impositivo ?? null,
+      base_imponible: calculada.base_imponible,
+      cuota_impuesto: calculada.cuota_impuesto,
+      total: calculada.total,
+      origen_importes: (traeImportes ? "documento" : "formula") as "documento" | "formula",
+      observaciones: datos.observaciones ?? null,
+      estado_linea: "Activa" as const,
+      // La línea hereda el entorno de su factura y no se edita.
+      entorno: factura.entorno,
+    };
+
+    const { data: creada, error } = await admin
+      .from("factura_lineas")
+      .insert(fila)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    await auditar(admin, {
+      entidad: "FacturaLinea",
+      entidadId: creada.id,
+      accion: "crear_linea_factura",
+      actor,
+      despues: fila,
+    });
+    return creada;
+  });
+
+/**
+ * actualizarLineaFactura — tres ramas mutuamente excluyentes (Parte 3.7):
+ * importes directos → se respetan ('documento'); campos de fórmula → recálculo
+ * íntegro desde cero ('formula'); ninguno de los dos → importes intactos.
+ */
+export const actualizarLineaFactura = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        cambios: camposLineaSchema,
+        actor: actorSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const { calcularLineaFactura, CAMPOS_FORMULA_LINEA, CAMPOS_IMPORTE_LINEA } = await import(
+      "./lineas-factura"
+    );
+    const admin = await adminAutorizado();
+    const antes = await leerLinea(admin, data.id);
+    const cambios = data.cambios as Record<string, unknown>;
+
+    const tocaImportes = CAMPOS_IMPORTE_LINEA.some((c) => c in cambios);
+    const tocaFormula = CAMPOS_FORMULA_LINEA.some((c) => c in cambios);
+
+    const actualizacion: Record<string, unknown> = {
+      ...cambios,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (tocaImportes) {
+      actualizacion["origen_importes"] = "documento";
+    } else if (tocaFormula) {
+      const base = {
+        cantidad: "cantidad" in cambios ? numeroOnull(cambios["cantidad"]) : numeroOnull(antes.cantidad),
+        precio_unitario:
+          "precio_unitario" in cambios
+            ? numeroOnull(cambios["precio_unitario"])
+            : numeroOnull(antes.precio_unitario),
+        descuento_tipo: ("descuento_tipo" in cambios
+          ? cambios["descuento_tipo"]
+          : antes.descuento_tipo) as "Porcentual" | "Absoluto" | null,
+        descuento_valor:
+          "descuento_valor" in cambios
+            ? numeroOnull(cambios["descuento_valor"])
+            : numeroOnull(antes.descuento_valor),
+        tipo_impositivo:
+          "tipo_impositivo" in cambios
+            ? numeroOnull(cambios["tipo_impositivo"])
+            : numeroOnull(antes.tipo_impositivo),
+        // Recálculo desde cero: nunca se arrastra un importe caducado.
+        base_imponible: null,
+        cuota_impuesto: null,
+        total: null,
+      };
+      const calculada = calcularLineaFactura(base);
+      actualizacion["base_imponible"] = calculada.base_imponible;
+      actualizacion["cuota_impuesto"] = calculada.cuota_impuesto;
+      actualizacion["total"] = calculada.total;
+      actualizacion["origen_importes"] = "formula";
+    }
+
+    if ("tipo_impuesto" in cambios && !("nombre_impuesto" in cambios)) {
+      actualizacion["nombre_impuesto"] = cambios["tipo_impuesto"] ?? null;
+    }
+
+    const { error } = await admin
+      .from("factura_lineas")
+      .update(actualizacion as never)
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await auditar(admin, {
+      entidad: "FacturaLinea",
+      entidadId: data.id,
+      accion: "modificar_linea_factura",
+      actor: data.actor,
+      antes,
+      despues: actualizacion,
+    });
+    return { ok: true as const, rama: tocaImportes ? "documento" : tocaFormula ? "formula" : "sin_importes" };
+  });
+
+/** recalcularImportesLineaFactura — fuerza el recálculo íntegro descartando importes manuales. */
+export const recalcularImportesLineaFactura = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({ id: z.string().uuid(), actor: actorSchema }).parse(data))
+  .handler(async ({ data }) => {
+    const { calcularLineaFactura } = await import("./lineas-factura");
+    const admin = await adminAutorizado();
+    const antes = await leerLinea(admin, data.id);
+    const calculada = calcularLineaFactura({
+      cantidad: numeroOnull(antes.cantidad),
+      precio_unitario: numeroOnull(antes.precio_unitario),
+      descuento_tipo: antes.descuento_tipo,
+      descuento_valor: numeroOnull(antes.descuento_valor),
+      tipo_impositivo: numeroOnull(antes.tipo_impositivo),
+      base_imponible: null,
+      cuota_impuesto: null,
+      total: null,
+    });
+    const cambios = {
+      base_imponible: calculada.base_imponible,
+      cuota_impuesto: calculada.cuota_impuesto,
+      total: calculada.total,
+      origen_importes: "formula" as const,
+      updated_at: new Date().toISOString(),
+    };
+    const { error } = await admin
+      .from("factura_lineas")
+      .update(cambios as never)
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await auditar(admin, {
+      entidad: "FacturaLinea",
+      entidadId: data.id,
+      accion: "modificar_linea_factura",
+      actor: data.actor,
+      antes: {
+        base_imponible: antes.base_imponible,
+        cuota_impuesto: antes.cuota_impuesto,
+        total: antes.total,
+        origen_importes: antes.origen_importes,
+      },
+      despues: cambios,
+    });
+    return { ok: true as const };
+  });
+
+/** eliminarLogicamenteLineaFactura — baja lógica únicamente (RB-018). */
+export const eliminarLogicamenteLineaFactura = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({ id: z.string().uuid(), actor: actorSchema }).parse(data))
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    const antes = await leerLinea(admin, data.id);
+    const cambios = { estado_linea: "Eliminada" as const, updated_at: new Date().toISOString() };
+    const { error } = await admin
+      .from("factura_lineas")
+      .update(cambios as never)
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    await auditar(admin, {
+      entidad: "FacturaLinea",
+      entidadId: data.id,
+      accion: "eliminar_logico_linea_factura",
+      actor: data.actor,
+      antes: { estado_linea: antes.estado_linea },
+      despues: cambios,
+    });
+    return { ok: true as const };
+  });
+
+/**
+ * reordenarLineasFactura — reasigna orden 1,2,3… según el array de ids.
+ * Una única entrada de auditoría, sobre la entidad Factura (Parte 2.7).
+ */
+export const reordenarLineasFactura = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z
+      .object({
+        facturaId: z.string().uuid(),
+        ordenIds: z.array(z.string().uuid()).min(1),
+        actor: actorSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    const { data: antes, error: errorLectura } = await admin
+      .from("factura_lineas")
+      .select("id, orden")
+      .eq("factura_id", data.facturaId)
+      .eq("estado_linea", "Activa")
+      .order("orden");
+    if (errorLectura) throw new Error(errorLectura.message);
+
+    let orden = 1;
+    for (const id of data.ordenIds) {
+      const { error } = await admin
+        .from("factura_lineas")
+        .update({ orden, updated_at: new Date().toISOString() } as never)
+        .eq("id", id)
+        .eq("factura_id", data.facturaId);
+      if (error) throw new Error(error.message);
+      orden += 1;
+    }
+
+    await auditar(admin, {
+      entidad: "Factura",
+      entidadId: data.facturaId,
+      accion: "reordenar_lineas_factura",
+      actor: data.actor,
+      antes: { orden: antes ?? [] },
+      despues: { orden: data.ordenIds.map((id, i) => ({ id, orden: i + 1 })) },
+    });
+    return { ok: true as const };
+  });
