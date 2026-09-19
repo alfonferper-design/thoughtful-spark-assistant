@@ -103,10 +103,12 @@ function Navegacion({ onNavegar }: { onNavegar?: () => void }) {
 export function AppShell({
   titulo,
   descripcion,
+  acciones,
   children,
 }: {
   titulo: string;
   descripcion?: string;
+  acciones?: ReactNode;
   children: ReactNode;
 }) {
   const { actor, guardarActor } = useActor();
