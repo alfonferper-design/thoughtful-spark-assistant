@@ -20,7 +20,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useActor, useFacturas, useProveedores, type Factura } from "@/lib/datos";
+import {
+  useActor,
+  useEstadosPagoFacturas,
+  useFacturas,
+  useProveedores,
+  type Factura,
+} from "@/lib/datos";
 import {
   cambiarEstadoContableFactura,
   cambiarEstadoDocumentalFactura,
