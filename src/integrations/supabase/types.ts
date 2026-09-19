@@ -14,7 +14,181 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      auditoria: {
+        Row: {
+          accion: string
+          actor: string
+          antes: Json | null
+          despues: Json | null
+          entidad: string
+          entidad_id: string | null
+          fecha: string
+          id: string
+        }
+        Insert: {
+          accion: string
+          actor?: string
+          antes?: Json | null
+          despues?: Json | null
+          entidad: string
+          entidad_id?: string | null
+          fecha?: string
+          id?: string
+        }
+        Update: {
+          accion?: string
+          actor?: string
+          antes?: Json | null
+          despues?: Json | null
+          entidad?: string
+          entidad_id?: string | null
+          fecha?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      categorias: {
+        Row: {
+          categoria_padre_id: string | null
+          created_at: string
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          id: string
+          nombre: string
+          tipo: Database["public"]["Enums"]["categoria_tipo"]
+        }
+        Insert: {
+          categoria_padre_id?: string | null
+          created_at?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          id?: string
+          nombre: string
+          tipo: Database["public"]["Enums"]["categoria_tipo"]
+        }
+        Update: {
+          categoria_padre_id?: string | null
+          created_at?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          id?: string
+          nombre?: string
+          tipo?: Database["public"]["Enums"]["categoria_tipo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categorias_categoria_padre_id_fkey"
+            columns: ["categoria_padre_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      configuracion: {
+        Row: {
+          actualizado_en: string
+          clave: string
+          valor: Json
+        }
+        Insert: {
+          actualizado_en?: string
+          clave: string
+          valor: Json
+        }
+        Update: {
+          actualizado_en?: string
+          clave?: string
+          valor?: Json
+        }
+        Relationships: []
+      }
+      cuentas: {
+        Row: {
+          activa: boolean
+          created_at: string
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          fecha_saldo_apertura: string
+          id: string
+          nombre: string
+          saldo_apertura: number
+          tipo: Database["public"]["Enums"]["cuenta_tipo"]
+        }
+        Insert: {
+          activa?: boolean
+          created_at?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          fecha_saldo_apertura: string
+          id?: string
+          nombre: string
+          saldo_apertura: number
+          tipo: Database["public"]["Enums"]["cuenta_tipo"]
+        }
+        Update: {
+          activa?: boolean
+          created_at?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          fecha_saldo_apertura?: string
+          id?: string
+          nombre?: string
+          saldo_apertura?: number
+          tipo?: Database["public"]["Enums"]["cuenta_tipo"]
+        }
+        Relationships: []
+      }
+      proveedores: {
+        Row: {
+          activo: boolean
+          categoria_defecto_id: string | null
+          cif: string | null
+          condiciones_pago: string | null
+          created_at: string
+          direccion: string | null
+          email: string | null
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          id: string
+          nombre_normalizado: string
+          nombre_visible: string
+          telefono: string | null
+          tipo: Database["public"]["Enums"]["proveedor_tipo"]
+        }
+        Insert: {
+          activo?: boolean
+          categoria_defecto_id?: string | null
+          cif?: string | null
+          condiciones_pago?: string | null
+          created_at?: string
+          direccion?: string | null
+          email?: string | null
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          id?: string
+          nombre_normalizado: string
+          nombre_visible: string
+          telefono?: string | null
+          tipo: Database["public"]["Enums"]["proveedor_tipo"]
+        }
+        Update: {
+          activo?: boolean
+          categoria_defecto_id?: string | null
+          cif?: string | null
+          condiciones_pago?: string | null
+          created_at?: string
+          direccion?: string | null
+          email?: string | null
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          id?: string
+          nombre_normalizado?: string
+          nombre_visible?: string
+          telefono?: string | null
+          tipo?: Database["public"]["Enums"]["proveedor_tipo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proveedores_categoria_defecto_id_fkey"
+            columns: ["categoria_defecto_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +197,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      categoria_tipo: "Ingreso" | "Gasto"
+      cuenta_tipo:
+        | "Cuenta corriente"
+        | "Línea de crédito"
+        | "Cuenta de inversión"
+      entorno_tipo: "produccion" | "prueba"
+      proveedor_tipo: "Cooperativa" | "Mayorista" | "Laboratorio" | "Servicio"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +330,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      categoria_tipo: ["Ingreso", "Gasto"],
+      cuenta_tipo: [
+        "Cuenta corriente",
+        "Línea de crédito",
+        "Cuenta de inversión",
+      ],
+      entorno_tipo: ["produccion", "prueba"],
+      proveedor_tipo: ["Cooperativa", "Mayorista", "Laboratorio", "Servicio"],
+    },
   },
 } as const
