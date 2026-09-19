@@ -14,6 +14,8 @@ import {
   listarMovimientos,
   obtenerFactura,
   saldosInternosCuentas,
+  listarVencimientos,
+  listarVencimientosFactura,
 } from "@/lib/datos.functions";
 import { estadoPuerta } from "@/lib/gate.functions";
 import type {
@@ -36,6 +38,11 @@ import type {
   SubtipoFinanciacion,
   TipoMovimiento,
 } from "@/lib/movimientos";
+import type {
+  ClaseVencimiento,
+  EstadoVencimiento,
+  TipoVencimiento,
+} from "@/lib/vencimientos";
 
 export type Cuenta = {
   id: string;
@@ -282,6 +289,39 @@ export function useSaldosInternos() {
     queryKey: ["saldos-internos"],
     queryFn: () => saldosInternosCuentas(),
     enabled: abierta,
+    retry: false,
+  });
+}
+
+export type Vencimiento = {
+  id: string;
+  factura_id: string | null;
+  compromiso_fijo_id: string | null;
+  fecha: string;
+  importe: number;
+  estado: EstadoVencimiento;
+  tipo: TipoVencimiento;
+  tipo_vencimiento: ClaseVencimiento;
+  entorno: "produccion" | "prueba";
+  created_at: string;
+};
+
+export function useVencimientos() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["vencimientos"],
+    queryFn: () => listarVencimientos(),
+    enabled: abierta,
+    retry: false,
+  });
+}
+
+export function useVencimientosFactura(facturaId: string) {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["vencimientos-factura", facturaId],
+    queryFn: () => listarVencimientosFactura({ data: { facturaId } }),
+    enabled: abierta && !!facturaId,
     retry: false,
   });
 }
