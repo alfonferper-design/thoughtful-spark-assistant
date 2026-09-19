@@ -48,7 +48,11 @@ export type RegistroAuditoria = {
   fecha: string;
 };
 
-async function listar<T>(tabla: string, orden: string, ascendente = true) {
+async function listar<T>(
+  tabla: "cuentas" | "categorias" | "proveedores" | "auditoria",
+  orden: string,
+  ascendente = true,
+) {
   const { data, error } = await supabase
     .from(tabla)
     .select("*")
