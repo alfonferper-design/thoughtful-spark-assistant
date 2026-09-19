@@ -944,3 +944,197 @@ export const subirDocumentoFactura = createServerFn({ method: "POST" })
 
     return { resultado, documentoId: creado.id, reutilizaArchivo };
   });
+
+// ---------- Movimiento (Parte 2.5) ----------
+
+export const listarMovimientos = createServerFn({ method: "GET" }).handler(async () => {
+  const admin = await adminAutorizado();
+  const { data, error } = await admin
+    .from("movimientos")
+    .select("*")
+    .order("fecha", { ascending: false })
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+});
+
+/**
+ * Saldos por cuenta: saldo de apertura guardado + saldo interno calculado (F-01).
+ * El saldo interno nunca se guarda; se deriva siempre de los movimientos en
+ * estado Confirmado o Conciliado entre fecha_saldo_apertura y la fecha pedida.
+ */
+export const saldosInternosCuentas = createServerFn({ method: "GET" }).handler(async () => {
+  const admin = await adminAutorizado();
+  const { saldoInterno } = await import("./movimientos");
+  const [cuentas, movimientos] = await Promise.all([
+    admin.from("cuentas").select("*").order("nombre"),
+    admin
+      .from("movimientos")
+      .select("cuenta_id, fecha, importe, tipo, subtipo_financiacion, direccion, estado"),
+  ]);
+  if (cuentas.error) throw new Error(cuentas.error.message);
+  if (movimientos.error) throw new Error(movimientos.error.message);
+  const hoy = new Date().toISOString().slice(0, 10);
+  const filas = movimientos.data ?? [];
+  return (cuentas.data ?? []).map((c) => ({
+    cuenta_id: c.id,
+    fecha_calculo: hoy,
+    saldo_interno: saldoInterno(
+      { saldo_apertura: Number(c.saldo_apertura), fecha_saldo_apertura: c.fecha_saldo_apertura },
+      filas
+        .filter((m) => m.cuenta_id === c.id)
+        .map((m) => ({
+          importe: Number(m.importe),
+          tipo: m.tipo,
+          subtipo_financiacion: m.subtipo_financiacion,
+          direccion: m.direccion,
+          estado: m.estado,
+          fecha: m.fecha,
+        })),
+      hoy,
+    ),
+  }));
+});
+
+/**
+ * F-14 · sugerirCategoriaProveedor: devuelve la categoría por defecto del
+ * proveedor, o null.
+ */
+export const sugerirCategoriaProveedor = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({ proveedorId: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    const { data: fila, error } = await admin
+      .from("proveedores")
+      .select("categoria_defecto_id")
+      .eq("id", data.proveedorId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return fila?.categoria_defecto_id ?? null;
+  });
+
+/**
+ * Función central de alta de movimiento. El documento señala como AMBIGUO que
+ * el original validara la Regla 1 solo en el onsubmit del formulario; aquí la
+ * validación vive en el servidor, antes de escribir.
+ *
+ * - RB-001 (Regla 1): Financiación exige subtipo_financiacion.
+ * - RB-002: el importe se guarda siempre en positivo (valor absoluto); el signo
+ *   nunca se guarda, lo deriva signoMovimiento() (F-00).
+ * - RB-003 (Regla 6): nunca se crea aquí un movimiento de 'Transferencia interna'.
+ * - origen siempre 'Manual'; 'Conciliado' no es asignable desde aquí.
+ * - clasificacion_origen se decide en el servidor comparando la categoría
+ *   elegida con la categoria_defecto_id del proveedor (F-14).
+ */
+export const crearMovimientoValidado = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z
+      .object({
+        cuenta_id: z.string().uuid(),
+        fecha: z.string().min(1),
+        importe: z.number(),
+        tipo: z.enum(["Ingreso", "Gasto", "Financiación"]),
+        subtipo_financiacion: z
+          .enum(["Principal recibido", "Principal devuelto", "Intereses", "Comisiones"])
+          .nullable(),
+        categoria_id: z.string().uuid().nullable(),
+        subcategoria_id: z.string().uuid().nullable(),
+        proveedor_id: z.string().uuid().nullable(),
+        metodo_cobro_pago: z.enum(["TPV", "Bizum", "Efectivo", "Transferencia"]).nullable(),
+        estado: z.enum(["Previsto", "Pendiente", "Confirmado"]),
+        relacionado_con_farmacia: z.boolean(),
+        entorno: entornoSchema,
+        actor: actorSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    const { MENSAJE_REGLA_1 } = await import("./movimientos");
+    const { actor, ...entrada } = data;
+
+    // RB-001 (Regla 1)
+    if (entrada.tipo === "Financiación" && !entrada.subtipo_financiacion) {
+      throw new Error(MENSAJE_REGLA_1);
+    }
+    const esFinanciacion = entrada.tipo === "Financiación";
+    const subtipo = esFinanciacion ? entrada.subtipo_financiacion : null;
+    const metodo = esFinanciacion ? null : entrada.metodo_cobro_pago;
+
+    // RB-002: el importe se guarda siempre positivo; cero y negativo se rechazan.
+    const importe = Math.abs(entrada.importe);
+    if (!Number.isFinite(importe) || importe <= 0) {
+      throw new Error("El importe debe ser mayor que cero (el signo lo determina el tipo).");
+    }
+
+    // La subcategoría debe ser hija de la categoría elegida.
+    let subcategoriaId = entrada.subcategoria_id;
+    if (subcategoriaId) {
+      if (!entrada.categoria_id) {
+        throw new Error("No se puede indicar una subcategoría sin categoría.");
+      }
+      const { data: sub, error: errorSub } = await admin
+        .from("categorias")
+        .select("categoria_padre_id")
+        .eq("id", subcategoriaId)
+        .maybeSingle();
+      if (errorSub) throw new Error(errorSub.message);
+      if (!sub || sub.categoria_padre_id !== entrada.categoria_id) {
+        throw new Error("La subcategoría elegida no pertenece a la categoría indicada.");
+      }
+    }
+    if (!entrada.categoria_id) subcategoriaId = null;
+
+    // clasificacion_origen (F-14): automática solo si coincide con la categoría
+    // por defecto del proveedor; manual si el usuario la cambió; null sin categoría.
+    let clasificacion: "automatica" | "manual" | null = null;
+    if (entrada.categoria_id) {
+      clasificacion = "manual";
+      if (entrada.proveedor_id) {
+        const { data: prov, error: errorProv } = await admin
+          .from("proveedores")
+          .select("categoria_defecto_id")
+          .eq("id", entrada.proveedor_id)
+          .maybeSingle();
+        if (errorProv) throw new Error(errorProv.message);
+        if (prov?.categoria_defecto_id && prov.categoria_defecto_id === entrada.categoria_id) {
+          clasificacion = "automatica";
+        }
+      }
+    }
+
+    const fila = {
+      cuenta_id: entrada.cuenta_id,
+      fecha: entrada.fecha,
+      importe,
+      tipo: entrada.tipo,
+      subtipo_financiacion: subtipo,
+      direccion: null,
+      categoria_id: entrada.categoria_id,
+      subcategoria_id: subcategoriaId,
+      proveedor_id: entrada.proveedor_id,
+      metodo_cobro_pago: metodo,
+      estado: entrada.estado,
+      origen: "Manual" as const,
+      relacionado_con_farmacia: entrada.relacionado_con_farmacia,
+      clasificacion_origen: clasificacion,
+      entorno: entrada.entorno,
+    };
+
+    const { data: creado, error } = await admin
+      .from("movimientos")
+      .insert(fila)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+
+    await auditar(admin, {
+      entidad: "Movimiento",
+      entidadId: creado.id,
+      accion: "crear",
+      actor,
+      despues: fila,
+    });
+
+    return creado;
+  });

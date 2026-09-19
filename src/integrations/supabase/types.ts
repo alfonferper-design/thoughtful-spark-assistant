@@ -402,6 +402,107 @@ export type Database = {
           },
         ]
       }
+      movimientos: {
+        Row: {
+          categoria_id: string | null
+          clasificacion_origen:
+            | Database["public"]["Enums"]["movimiento_clasificacion_origen"]
+            | null
+          created_at: string
+          cuenta_id: string
+          direccion: Database["public"]["Enums"]["movimiento_direccion"] | null
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          estado: Database["public"]["Enums"]["movimiento_estado"]
+          fecha: string
+          id: string
+          importe: number
+          metodo_cobro_pago: string | null
+          origen: Database["public"]["Enums"]["movimiento_origen"]
+          proveedor_id: string | null
+          relacionado_con_farmacia: boolean
+          subcategoria_id: string | null
+          subtipo_financiacion:
+            | Database["public"]["Enums"]["movimiento_subtipo_financiacion"]
+            | null
+          tipo: Database["public"]["Enums"]["movimiento_tipo"]
+        }
+        Insert: {
+          categoria_id?: string | null
+          clasificacion_origen?:
+            | Database["public"]["Enums"]["movimiento_clasificacion_origen"]
+            | null
+          created_at?: string
+          cuenta_id: string
+          direccion?: Database["public"]["Enums"]["movimiento_direccion"] | null
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          estado?: Database["public"]["Enums"]["movimiento_estado"]
+          fecha: string
+          id?: string
+          importe: number
+          metodo_cobro_pago?: string | null
+          origen?: Database["public"]["Enums"]["movimiento_origen"]
+          proveedor_id?: string | null
+          relacionado_con_farmacia?: boolean
+          subcategoria_id?: string | null
+          subtipo_financiacion?:
+            | Database["public"]["Enums"]["movimiento_subtipo_financiacion"]
+            | null
+          tipo: Database["public"]["Enums"]["movimiento_tipo"]
+        }
+        Update: {
+          categoria_id?: string | null
+          clasificacion_origen?:
+            | Database["public"]["Enums"]["movimiento_clasificacion_origen"]
+            | null
+          created_at?: string
+          cuenta_id?: string
+          direccion?: Database["public"]["Enums"]["movimiento_direccion"] | null
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          estado?: Database["public"]["Enums"]["movimiento_estado"]
+          fecha?: string
+          id?: string
+          importe?: number
+          metodo_cobro_pago?: string | null
+          origen?: Database["public"]["Enums"]["movimiento_origen"]
+          proveedor_id?: string | null
+          relacionado_con_farmacia?: boolean
+          subcategoria_id?: string | null
+          subtipo_financiacion?:
+            | Database["public"]["Enums"]["movimiento_subtipo_financiacion"]
+            | null
+          tipo?: Database["public"]["Enums"]["movimiento_tipo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimientos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimientos_cuenta_id_fkey"
+            columns: ["cuenta_id"]
+            isOneToOne: false
+            referencedRelation: "cuentas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimientos_proveedor_id_fkey"
+            columns: ["proveedor_id"]
+            isOneToOne: false
+            referencedRelation: "proveedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movimientos_subcategoria_id_fkey"
+            columns: ["subcategoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       proveedores: {
         Row: {
           activo: boolean
@@ -489,6 +590,20 @@ export type Database = {
       linea_descuento_tipo: "Porcentual" | "Absoluto"
       linea_estado: "Activa" | "Eliminada"
       linea_origen_importes: "formula" | "documento"
+      movimiento_clasificacion_origen: "automatica" | "manual"
+      movimiento_direccion: "entrada" | "salida"
+      movimiento_estado: "Previsto" | "Pendiente" | "Confirmado" | "Conciliado"
+      movimiento_origen: "Manual" | "Importado" | "Regla"
+      movimiento_subtipo_financiacion:
+        | "Principal recibido"
+        | "Principal devuelto"
+        | "Intereses"
+        | "Comisiones"
+      movimiento_tipo:
+        | "Ingreso"
+        | "Gasto"
+        | "Financiación"
+        | "Transferencia interna"
       proveedor_tipo: "Cooperativa" | "Mayorista" | "Laboratorio" | "Servicio"
     }
     CompositeTypes: {
@@ -643,6 +758,22 @@ export const Constants = {
       linea_descuento_tipo: ["Porcentual", "Absoluto"],
       linea_estado: ["Activa", "Eliminada"],
       linea_origen_importes: ["formula", "documento"],
+      movimiento_clasificacion_origen: ["automatica", "manual"],
+      movimiento_direccion: ["entrada", "salida"],
+      movimiento_estado: ["Previsto", "Pendiente", "Confirmado", "Conciliado"],
+      movimiento_origen: ["Manual", "Importado", "Regla"],
+      movimiento_subtipo_financiacion: [
+        "Principal recibido",
+        "Principal devuelto",
+        "Intereses",
+        "Comisiones",
+      ],
+      movimiento_tipo: [
+        "Ingreso",
+        "Gasto",
+        "Financiación",
+        "Transferencia interna",
+      ],
       proveedor_tipo: ["Cooperativa", "Mayorista", "Laboratorio", "Servicio"],
     },
   },

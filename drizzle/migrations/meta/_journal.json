@@ -36,6 +36,13 @@
       "when": 1789825048898,
       "tag": "0004_create_documentos",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1789825634891,
+      "tag": "0005_create_movimientos",
+      "breakpoints": true
     }
   ]
 }
