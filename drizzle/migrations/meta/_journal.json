@@ -43,6 +43,13 @@
       "when": 1789825634891,
       "tag": "0005_create_movimientos",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789826076663,
+      "tag": "0006_create_vencimientos",
+      "breakpoints": true
     }
   ]
 }
