@@ -235,3 +235,43 @@ export function useDocumentosFactura(facturaId: string) {
     retry: false,
   });
 }
+
+export type Movimiento = {
+  id: string;
+  cuenta_id: string;
+  fecha: string;
+  importe: number;
+  tipo: TipoMovimiento;
+  subtipo_financiacion: SubtipoFinanciacion | null;
+  direccion: DireccionMovimiento | null;
+  categoria_id: string | null;
+  subcategoria_id: string | null;
+  proveedor_id: string | null;
+  metodo_cobro_pago: string | null;
+  estado: EstadoMovimiento;
+  origen: OrigenMovimiento;
+  relacionado_con_farmacia: boolean;
+  clasificacion_origen: ClasificacionOrigen | null;
+  entorno: "produccion" | "prueba";
+  created_at: string;
+};
+
+export function useMovimientos() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["movimientos"],
+    queryFn: () => listarMovimientos(),
+    enabled: abierta,
+    retry: false,
+  });
+}
+
+export function useSaldosInternos() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["saldos-internos"],
+    queryFn: () => saldosInternosCuentas(),
+    enabled: abierta,
+    retry: false,
+  });
+}
