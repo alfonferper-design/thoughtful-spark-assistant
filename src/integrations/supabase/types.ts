@@ -82,6 +82,94 @@ export type Database = {
           },
         ]
       }
+      conciliacion_detalle: {
+        Row: {
+          conciliacion_id: string
+          created_at: string
+          id: string
+          importe_aplicado: number
+          movimiento_id: string
+          vencimiento_id: string
+        }
+        Insert: {
+          conciliacion_id: string
+          created_at?: string
+          id?: string
+          importe_aplicado: number
+          movimiento_id: string
+          vencimiento_id: string
+        }
+        Update: {
+          conciliacion_id?: string
+          created_at?: string
+          id?: string
+          importe_aplicado?: number
+          movimiento_id?: string
+          vencimiento_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conciliacion_detalle_conciliacion_id_fkey"
+            columns: ["conciliacion_id"]
+            isOneToOne: false
+            referencedRelation: "conciliaciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conciliacion_detalle_movimiento_id_fkey"
+            columns: ["movimiento_id"]
+            isOneToOne: false
+            referencedRelation: "movimientos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conciliacion_detalle_vencimiento_id_fkey"
+            columns: ["vencimiento_id"]
+            isOneToOne: false
+            referencedRelation: "vencimientos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conciliaciones: {
+        Row: {
+          autorizado_por: string | null
+          confirmado_por: string | null
+          created_at: string
+          entorno: Database["public"]["Enums"]["entorno_tipo"]
+          exceso_autorizado: boolean
+          fecha_confirmacion: string | null
+          id: string
+          motivo_exceso: string | null
+          nivel_confianza: number | null
+          tipo: Database["public"]["Enums"]["conciliacion_tipo"]
+        }
+        Insert: {
+          autorizado_por?: string | null
+          confirmado_por?: string | null
+          created_at?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          exceso_autorizado?: boolean
+          fecha_confirmacion?: string | null
+          id?: string
+          motivo_exceso?: string | null
+          nivel_confianza?: number | null
+          tipo: Database["public"]["Enums"]["conciliacion_tipo"]
+        }
+        Update: {
+          autorizado_por?: string | null
+          confirmado_por?: string | null
+          created_at?: string
+          entorno?: Database["public"]["Enums"]["entorno_tipo"]
+          exceso_autorizado?: boolean
+          fecha_confirmacion?: string | null
+          id?: string
+          motivo_exceso?: string | null
+          nivel_confianza?: number | null
+          tipo?: Database["public"]["Enums"]["conciliacion_tipo"]
+        }
+        Relationships: []
+      }
       configuracion: {
         Row: {
           actualizado_en: string
@@ -611,10 +699,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      registrar_conciliacion: {
+        Args: {
+          p_actor: string
+          p_autorizar_exceso: boolean
+          p_confirmado_por: string
+          p_importe_aplicado: number
+          p_motivo_exceso: string
+          p_movimiento_id: string
+          p_nivel_confianza: number
+          p_tipo: Database["public"]["Enums"]["conciliacion_tipo"]
+          p_vencimiento_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       categoria_tipo: "Ingreso" | "Gasto"
+      conciliacion_tipo: "Exacta" | "Parcial" | "Agrupada"
       cuenta_tipo:
         | "Cuenta corriente"
         | "Línea de crédito"
@@ -788,6 +890,7 @@ export const Constants = {
   public: {
     Enums: {
       categoria_tipo: ["Ingreso", "Gasto"],
+      conciliacion_tipo: ["Exacta", "Parcial", "Agrupada"],
       cuenta_tipo: [
         "Cuenta corriente",
         "Línea de crédito",
