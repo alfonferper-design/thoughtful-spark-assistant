@@ -81,6 +81,7 @@ function PantallaFacturas() {
 
   async function refrescar() {
     await queryClient.invalidateQueries({ queryKey: ["facturas"] });
+    await queryClient.invalidateQueries({ queryKey: ["estados-pago-facturas"] });
     await queryClient.invalidateQueries({ queryKey: ["auditoria"] });
   }
 
