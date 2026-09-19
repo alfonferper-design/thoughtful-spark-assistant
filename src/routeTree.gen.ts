@@ -22,12 +22,14 @@ import { Route as DiagnosticoRouteImport } from './routes/diagnostico'
 import { Route as FacturasRouteImport } from './routes/facturas'
 import { Route as FichaRouteImport } from './routes/ficha'
 import { Route as InformesRouteImport } from './routes/informes'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as MovimientosRouteImport } from './routes/movimientos'
 import { Route as ProveedoresRouteImport } from './routes/proveedores'
 import { Route as SnapshotsRouteImport } from './routes/snapshots'
 import { Route as TransferenciasRouteImport } from './routes/transferencias'
 import { Route as ValidacionRouteImport } from './routes/validacion'
 import { Route as VencimientosRouteImport } from './routes/vencimientos'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -94,6 +96,11 @@ const InformesRoute = InformesRouteImport.update({
   path: '/informes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MovimientosRoute = MovimientosRouteImport.update({
   id: '/movimientos',
   path: '/movimientos',
@@ -124,6 +131,12 @@ const VencimientosRoute = VencimientosRouteImport.update({
   path: '/vencimientos',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -139,12 +152,14 @@ export interface FileRoutesByFullPath {
   '/facturas': typeof FacturasRoute
   '/ficha': typeof FichaRoute
   '/informes': typeof InformesRoute
+  '/mcp': typeof McpRoute
   '/movimientos': typeof MovimientosRoute
   '/proveedores': typeof ProveedoresRoute
   '/snapshots': typeof SnapshotsRoute
   '/transferencias': typeof TransferenciasRoute
   '/validacion': typeof ValidacionRoute
   '/vencimientos': typeof VencimientosRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -160,12 +175,14 @@ export interface FileRoutesByTo {
   '/facturas': typeof FacturasRoute
   '/ficha': typeof FichaRoute
   '/informes': typeof InformesRoute
+  '/mcp': typeof McpRoute
   '/movimientos': typeof MovimientosRoute
   '/proveedores': typeof ProveedoresRoute
   '/snapshots': typeof SnapshotsRoute
   '/transferencias': typeof TransferenciasRoute
   '/validacion': typeof ValidacionRoute
   '/vencimientos': typeof VencimientosRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -182,12 +199,14 @@ export interface FileRoutesById {
   '/facturas': typeof FacturasRoute
   '/ficha': typeof FichaRoute
   '/informes': typeof InformesRoute
+  '/mcp': typeof McpRoute
   '/movimientos': typeof MovimientosRoute
   '/proveedores': typeof ProveedoresRoute
   '/snapshots': typeof SnapshotsRoute
   '/transferencias': typeof TransferenciasRoute
   '/validacion': typeof ValidacionRoute
   '/vencimientos': typeof VencimientosRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -205,12 +224,14 @@ export interface FileRouteTypes {
     | '/facturas'
     | '/ficha'
     | '/informes'
+    | '/mcp'
     | '/movimientos'
     | '/proveedores'
     | '/snapshots'
     | '/transferencias'
     | '/validacion'
     | '/vencimientos'
+    | '/.well-known/oauth-protected-resource'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -226,12 +247,14 @@ export interface FileRouteTypes {
     | '/facturas'
     | '/ficha'
     | '/informes'
+    | '/mcp'
     | '/movimientos'
     | '/proveedores'
     | '/snapshots'
     | '/transferencias'
     | '/validacion'
     | '/vencimientos'
+    | '/.well-known/oauth-protected-resource'
   id:
     | '__root__'
     | '/'
@@ -247,12 +270,14 @@ export interface FileRouteTypes {
     | '/facturas'
     | '/ficha'
     | '/informes'
+    | '/mcp'
     | '/movimientos'
     | '/proveedores'
     | '/snapshots'
     | '/transferencias'
     | '/validacion'
     | '/vencimientos'
+    | '/.well-known/oauth-protected-resource'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -269,12 +294,14 @@ export interface RootRouteChildren {
   FacturasRoute: typeof FacturasRoute
   FichaRoute: typeof FichaRoute
   InformesRoute: typeof InformesRoute
+  McpRoute: typeof McpRoute
   MovimientosRoute: typeof MovimientosRoute
   ProveedoresRoute: typeof ProveedoresRoute
   SnapshotsRoute: typeof SnapshotsRoute
   TransferenciasRoute: typeof TransferenciasRoute
   ValidacionRoute: typeof ValidacionRoute
   VencimientosRoute: typeof VencimientosRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -370,6 +397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InformesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/movimientos': {
       id: '/movimientos'
       path: '/movimientos'
@@ -412,6 +446,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VencimientosRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -429,12 +470,15 @@ const rootRouteChildren: RootRouteChildren = {
   FacturasRoute: FacturasRoute,
   FichaRoute: FichaRoute,
   InformesRoute: InformesRoute,
+  McpRoute: McpRoute,
   MovimientosRoute: MovimientosRoute,
   ProveedoresRoute: ProveedoresRoute,
   SnapshotsRoute: SnapshotsRoute,
   TransferenciasRoute: TransferenciasRoute,
   ValidacionRoute: ValidacionRoute,
   VencimientosRoute: VencimientosRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
