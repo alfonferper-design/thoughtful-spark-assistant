@@ -724,3 +724,223 @@ export const reordenarLineasFactura = createServerFn({ method: "POST" })
     });
     return { ok: true as const };
   });
+
+// ---------- Documento adjunto de una factura (Partes 2.13 y 3.8) ----------
+
+const BUCKET_DOCUMENTOS = "documentos-facturas";
+
+/** documentosDeFactura(facturaId) — activo primero, luego sustituidos. */
+export const listarDocumentosFactura = createServerFn({ method: "GET" })
+  .inputValidator((data) => z.object({ facturaId: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    const { data: filas, error } = await admin
+      .from("documentos")
+      .select("*")
+      .eq("factura_id", data.facturaId)
+      .order("fecha_incorporacion", { ascending: false });
+    if (error) throw new Error(error.message);
+    return filas ?? [];
+  });
+
+/**
+ * Enlace temporal (60 segundos) para ver o descargar el archivo. El bucket es
+ * privado: no existe ninguna URL pública ni permanente.
+ */
+export const enlaceDocumento = createServerFn({ method: "POST" })
+  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data }) => {
+    const admin = await adminAutorizado();
+    const { data: doc, error } = await admin
+      .from("documentos")
+      .select("referencia_almacenamiento, nombre_original")
+      .eq("id", data.id)
+      .single();
+    if (error) throw new Error(error.message);
+    const { data: firmado, error: errorFirma } = await admin.storage
+      .from(BUCKET_DOCUMENTOS)
+      .createSignedUrl(doc.referencia_almacenamiento, 60);
+    if (errorFirma || !firmado) {
+      throw new Error(errorFirma?.message ?? "No se pudo generar el enlace temporal");
+    }
+    return { url: firmado.signedUrl, nombre: doc.nombre_original };
+  });
+
+/**
+ * subirDocumentoFactura — Parte 3.8. Validaciones en el orden exacto del
+ * documento (tipo permitido → archivo no vacío → máximo 10 MB) y resultado
+ * determinado por el hash SHA-256: 'sin_cambios', 'duplicado_detectado',
+ * 'sustituido' o 'asociado'. Nunca se borra nada: el documento anterior pasa a
+ * 'Sustituido'. facturas.documento_original se deja siempre en null (Parte 2.6:
+ * campo sin uso real, sustituido por la entidad Documento).
+ */
+export const subirDocumentoFactura = createServerFn({ method: "POST" })
+  .inputValidator((data) =>
+    z
+      .object({
+        facturaId: z.string().uuid(),
+        nombre: z.string().trim().min(1),
+        tipoMime: z.string().trim().min(1),
+        contenidoBase64: z.string(),
+        forzarDuplicado: z.boolean().optional(),
+        actor: actorSchema,
+      })
+      .parse(data),
+  )
+  .handler(async ({ data }) => {
+    const {
+      TIPOS_DOC_PERMITIDOS,
+      MAX_DOC_BYTES,
+      MENSAJE_TIPO_NO_PERMITIDO,
+      MENSAJE_ARCHIVO_VACIO,
+      MENSAJE_DEMASIADO_GRANDE,
+      extensionDeTipo,
+    } = await import("./documentos");
+    const { createHash } = await import("node:crypto");
+
+    // 1) Tipo de archivo permitido
+    if (!TIPOS_DOC_PERMITIDOS[data.tipoMime]) throw new Error(MENSAJE_TIPO_NO_PERMITIDO);
+
+    const bytes = Buffer.from(data.contenidoBase64, "base64");
+    // 2) Archivo no vacío
+    if (bytes.byteLength === 0) throw new Error(MENSAJE_ARCHIVO_VACIO);
+    // 3) Máximo 10 MB
+    if (bytes.byteLength > MAX_DOC_BYTES) throw new Error(MENSAJE_DEMASIADO_GRANDE);
+
+    const admin = await adminAutorizado();
+    const factura = await leerFactura(admin, data.facturaId);
+    const hash = createHash("sha256").update(bytes).digest("hex");
+    const forzar = data.forzarDuplicado === true;
+
+    const { data: mismoHash, error: errorHash } = await admin
+      .from("documentos")
+      .select("*")
+      .eq("hash_sha256", hash);
+    if (errorHash) throw new Error(errorHash.message);
+    const coincidencias = mismoHash ?? [];
+
+    // Mismo archivo, misma factura, ya activo: nada que hacer ni que auditar.
+    const yaActivoAqui = coincidencias.find(
+      (d) => d.factura_id === data.facturaId && d.estado_documento === "Activo",
+    );
+    if (yaActivoAqui) {
+      return { resultado: "sin_cambios" as const, documentoId: yaActivoAqui.id };
+    }
+
+    if (coincidencias.length > 0 && !forzar) {
+      await auditar(admin, {
+        entidad: "Documento",
+        entidadId: null,
+        accion: "detectar_documento_duplicado",
+        actor: data.actor,
+        despues: {
+          factura_id: data.facturaId,
+          hash_sha256: hash,
+          facturas_con_ese_hash: coincidencias.map((d) => d.factura_id),
+        },
+      });
+      return {
+        resultado: "duplicado_detectado" as const,
+        hash,
+        facturasConEseHash: coincidencias.map((d) => d.factura_id),
+      };
+    }
+
+    // Se reutiliza el archivo físico si el hash ya estaba almacenado.
+    const reutilizaArchivo = coincidencias.length > 0;
+    let referencia = coincidencias[0]?.referencia_almacenamiento ?? "";
+    if (!reutilizaArchivo) {
+      referencia = `facturas/${data.facturaId}/${hash}.${extensionDeTipo(data.tipoMime)}`;
+      const { error: errorSubida } = await admin.storage
+        .from(BUCKET_DOCUMENTOS)
+        .upload(referencia, bytes, { contentType: data.tipoMime, upsert: true });
+      if (errorSubida) throw new Error(errorSubida.message);
+    }
+
+    const { data: activoPrevio, error: errorPrevio } = await admin
+      .from("documentos")
+      .select("*")
+      .eq("factura_id", data.facturaId)
+      .eq("estado_documento", "Activo")
+      .maybeSingle();
+    if (errorPrevio) throw new Error(errorPrevio.message);
+
+    if (activoPrevio) {
+      const { error } = await admin
+        .from("documentos")
+        .update({
+          estado_documento: "Sustituido",
+          updated_at: new Date().toISOString(),
+        } as never)
+        .eq("id", activoPrevio.id);
+      if (error) throw new Error(error.message);
+    }
+
+    const fila = {
+      factura_id: data.facturaId,
+      nombre_original: data.nombre,
+      tipo_mime: data.tipoMime,
+      tamano_bytes: bytes.byteLength,
+      hash_sha256: hash,
+      actor: data.actor,
+      referencia_almacenamiento: referencia,
+      estado_documento: "Activo" as const,
+      // El documento hereda el entorno de su factura.
+      entorno: factura.entorno,
+    };
+    const { data: creado, error: errorInsert } = await admin
+      .from("documentos")
+      .insert(fila)
+      .select()
+      .single();
+    if (errorInsert) throw new Error(errorInsert.message);
+
+    const resultado = activoPrevio ? ("sustituido" as const) : ("asociado" as const);
+
+    await auditar(admin, {
+      entidad: "Documento",
+      entidadId: creado.id,
+      accion: activoPrevio ? "sustituir_documento" : "subir_documento",
+      actor: data.actor,
+      antes: activoPrevio
+        ? {
+            id: activoPrevio.id,
+            nombre_original: activoPrevio.nombre_original,
+            hash_sha256: activoPrevio.hash_sha256,
+            estado_documento: activoPrevio.estado_documento,
+          }
+        : undefined,
+      despues: { ...fila, reutiliza_archivo: reutilizaArchivo },
+    });
+
+    if (activoPrevio) {
+      await auditar(admin, {
+        entidad: "Documento",
+        entidadId: activoPrevio.id,
+        accion: "documento_sustituido",
+        actor: data.actor,
+        antes: { estado_documento: "Activo" },
+        despues: { estado_documento: "Sustituido", sustituido_por: creado.id },
+      });
+    } else {
+      await auditar(admin, {
+        entidad: "Factura",
+        entidadId: data.facturaId,
+        accion: "documento_asociado",
+        actor: data.actor,
+        despues: { documento_id: creado.id, hash_sha256: hash },
+      });
+    }
+
+    if (reutilizaArchivo) {
+      await auditar(admin, {
+        entidad: "Documento",
+        entidadId: creado.id,
+        accion: "duplicado_confirmado_reutilizado",
+        actor: data.actor,
+        despues: { hash_sha256: hash, referencia_almacenamiento: referencia },
+      });
+    }
+
+    return { resultado, documentoId: creado.id, reutilizaArchivo };
+  });
