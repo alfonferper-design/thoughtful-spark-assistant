@@ -23,6 +23,13 @@ import {
   listarConciliaciones,
 } from "@/lib/datos.functions";
 import { estadoPuerta } from "@/lib/gate.functions";
+import {
+  diferenciasCuentas,
+  listarSnapshots,
+  listarTransferencias,
+} from "@/lib/tesoreria.functions";
+import { datosDashboard } from "@/lib/analisis.functions";
+import { informeDiagnostico } from "@/lib/diagnostico.functions";
 import type {
   EstadoContableFactura,
   EstadoDocumentalFactura,
@@ -379,6 +386,58 @@ export function useConciliaciones() {
   return useQuery({
     queryKey: ["conciliaciones"],
     queryFn: () => listarConciliaciones(),
+    enabled: abierta,
+    retry: false,
+  });
+}
+
+// ---------- Tesorería, Análisis y Diagnóstico ----------
+
+export function useSnapshots() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["snapshots"],
+    queryFn: () => listarSnapshots(),
+    enabled: abierta,
+    retry: false,
+  });
+}
+
+export function useDiferenciasCuentas() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["diferencias-cuentas"],
+    queryFn: () => diferenciasCuentas(),
+    enabled: abierta,
+    retry: false,
+  });
+}
+
+export function useTransferencias() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["transferencias"],
+    queryFn: () => listarTransferencias(),
+    enabled: abierta,
+    retry: false,
+  });
+}
+
+export function useDashboard() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["dashboard"],
+    queryFn: () => datosDashboard(),
+    enabled: abierta,
+    retry: false,
+  });
+}
+
+export function useDiagnostico() {
+  const abierta = usePuertaAbierta();
+  return useQuery({
+    queryKey: ["diagnostico"],
+    queryFn: () => informeDiagnostico(),
     enabled: abierta,
     retry: false,
   });
