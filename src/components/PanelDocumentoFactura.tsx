@@ -230,6 +230,7 @@ export function PanelDocumentoFactura({
               ))}
             </TableBody>
           </Table>
+          </details>
         )}
 
         <p className="text-xs text-muted-foreground">
