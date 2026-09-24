@@ -1,20 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCuentas, useCategorias, useProveedores } from "@/lib/datos";
+import { Check, CheckCircle2, ChevronRight, Circle } from "lucide-react";
 
 export const Route = createFileRoute("/_gateado/")({
   head: () => ({
     meta: [
-      { title: "Configuración inicial · Farmatrack" },
+      { title: "Inicio · Farmatrack" },
       {
         name: "description",
         content:
           "Punto de partida de la plataforma financiera de la farmacia: cuentas, categorías y proveedores dados de alta.",
       },
-      { property: "og:title", content: "Configuración inicial · Farmatrack" },
+      { property: "og:title", content: "Inicio · Farmatrack" },
       {
         property: "og:description",
         content:
@@ -33,19 +33,16 @@ function ConfiguracionInicial() {
   const pasos = [
     {
       titulo: "Cuentas bancarias",
-      detalle: "Cada cuenta con su saldo de apertura y su fecha.",
       total: cuentas.data?.length ?? 0,
       path: "/cuentas" as const,
     },
     {
       titulo: "Categorías y subcategorías",
-      detalle: "Dos niveles como máximo, de ingreso o de gasto.",
       total: categorias.data?.length ?? 0,
       path: "/categorias" as const,
     },
     {
       titulo: "Proveedores",
-      detalle: "Cooperativas, mayoristas, laboratorios y servicios.",
       total: proveedores.data?.length ?? 0,
       path: "/proveedores" as const,
     },
@@ -55,40 +52,100 @@ function ConfiguracionInicial() {
 
   return (
     <AppShell
-      titulo="Configuración inicial"
+      titulo="Inicio"
       descripcion="Da de alta los datos maestros antes de registrar movimientos y facturas."
     >
       <div className="space-y-6">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">
-              Progreso de puesta en marcha
-              <span className="tabular ml-2 text-muted-foreground">
-                {completados}/{pasos.length}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
-            {pasos.map((paso) => (
-              <div
-                key={paso.titulo}
-                className="rounded-lg border border-border bg-card p-4"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <p className="font-medium">{paso.titulo}</p>
-                  <Badge variant={paso.total > 0 ? "default" : "secondary"}>
-                    {paso.total > 0 ? "Listo" : "Pendiente"}
-                  </Badge>
+        {completados < pasos.length && (
+          <Card>
+            <CardHeader className="space-y-3 pb-4">
+              <p className="text-xs font-semibold uppercase text-primary">Puesta en marcha</p>
+              <div>
+                <CardTitle className="text-lg">Configuración inicial pendiente</CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Completa estos datos antes de empezar a trabajar con datos reales. Pulsa cada
+                  elemento para completarlo.
+                </p>
+              </div>
+              <div>
+                <p className="tabular text-xs font-medium text-muted-foreground">
+                  {completados} de {pasos.length} necesarios completados
+                </p>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary transition-[width]"
+                    style={{ width: `${(completados / pasos.length) * 100}%` }}
+                  />
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">{paso.detalle}</p>
-                <p className="tabular mt-3 text-2xl">{paso.total}</p>
-                <Button asChild variant="outline" size="sm" className="mt-3">
-                  <Link to={paso.path}>Ir a {paso.titulo.toLowerCase()}</Link>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+                  Necesario
+                </p>
+                <div className="divide-y divide-border overflow-hidden rounded-md border border-border">
+                  {pasos.map((paso) => {
+                    const configurado = paso.total > 0;
+                    return (
+                      <Button
+                        key={paso.titulo}
+                        asChild
+                        variant="ghost"
+                        className="h-auto min-h-12 w-full justify-start rounded-none px-3 py-2.5 text-left first:rounded-t-md last:rounded-b-md"
+                      >
+                        <Link to={paso.path}>
+                          {configurado ? (
+                            <CheckCircle2 className="text-success" />
+                          ) : (
+                            <Circle className="text-warning" />
+                          )}
+                          <span className="min-w-0 flex-1 whitespace-normal font-medium">
+                            {paso.titulo}
+                          </span>
+                          <span
+                            className={`tabular shrink-0 whitespace-normal text-right text-xs sm:text-sm ${
+                              configurado ? "text-success" : "text-warning"
+                            }`}
+                          >
+                            {configurado ? (
+                              <span className="inline-flex items-center gap-1">
+                                <Check className="h-3.5 w-3.5" /> Configurado · {paso.total}
+                              </span>
+                            ) : (
+                              "Pendiente"
+                            )}
+                          </span>
+                          <ChevronRight className="text-muted-foreground" />
+                        </Link>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">
+                  Opcional
+                </p>
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="h-auto min-h-12 w-full justify-start rounded-md border border-border px-3 py-2.5 text-left text-muted-foreground"
+                >
+                  <Link to="/compromisos">
+                    <Circle className="stroke-[1.5] [stroke-dasharray:3_3]" />
+                    <span className="min-w-0 flex-1 whitespace-normal font-medium">
+                      Compromisos fijos
+                    </span>
+                    <span className="shrink-0 text-xs sm:text-sm">Opcional</span>
+                    <ChevronRight />
+                  </Link>
                 </Button>
               </div>
-            ))}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader className="pb-2">
