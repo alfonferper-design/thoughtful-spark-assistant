@@ -89,30 +89,44 @@ export function PanelDocumentoFactura({
     }
   }
 
-  async function abrir(id: string) {
+  async function abrir(id: string, descargar = false) {
     try {
-      const { url } = await enlaceDocumento({ data: { id } });
-      window.open(url, "_blank", "noopener,noreferrer");
-    } catch (error) {
-      toast.error("No se pudo abrir el archivo: " + (error as Error).message);
+      const { url } = await enlaceDocumento({ data: { id, descargar } });
+      if (descargar) window.location.href = url;
+      else window.open(url, "_blank", "noopener,noreferrer");
+    } catch {
+      toast.error("No se pudo abrir la factura original. Inténtalo de nuevo.");
     }
   }
 
   return (
     <Card className="mb-6">
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">Documento de la factura</CardTitle>
+        <CardTitle className="text-base">Documentación</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 text-sm">
         {activo ? (
-          <p className="text-muted-foreground">
-            Archivo adjunto actual: <span className="text-foreground">{activo.nombre_original}</span>{" "}
-            ({tamanoLegible(Number(activo.tamano_bytes))}).
-          </p>
+          <div className="rounded-md border p-4">
+            <p className="font-medium">📄 Factura original</p>
+            <p className="mb-3 text-muted-foreground">
+              {activo.nombre_original} · {tamanoLegible(Number(activo.tamano_bytes))}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button size="sm" onClick={() => void abrir(activo.id)}>
+                📄 Ver factura original
+              </Button>
+              <Button size="sm" variant="outline" onClick={() => void abrir(activo.id, true)}>
+                Descargar
+              </Button>
+            </div>
+          </div>
         ) : (
-          <p className="text-muted-foreground">
-            Esta factura todavía no tiene archivo adjunto.
-          </p>
+          <div className="rounded-md border border-dashed p-4">
+            <p className="font-medium">Sin factura original</p>
+            <p className="text-muted-foreground">
+              Esta factura todavía no tiene un documento adjunto.
+            </p>
+          </div>
         )}
 
         <div className="flex flex-wrap items-center gap-3">
@@ -126,6 +140,7 @@ export function PanelDocumentoFactura({
           />
           <Button
             size="sm"
+            variant={activo ? "outline" : "default"}
             disabled={subiendo}
             onClick={() => {
               const archivo = entrada.current?.files?.[0];
@@ -136,7 +151,7 @@ export function PanelDocumentoFactura({
               void subir(archivo, false);
             }}
           >
-            {activo ? "Sustituir documento" : "Adjuntar documento"}
+            {subiendo ? "Subiendo…" : activo ? "Sustituir documento" : "+ Adjuntar factura"}
           </Button>
           <span className="text-xs text-muted-foreground">
             PDF, JPG, PNG o WEBP · máximo {tamanoLegible(MAX_DOC_BYTES)}
