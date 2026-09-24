@@ -185,6 +185,10 @@ export function PanelDocumentoFactura({
         )}
 
         {lista.length > 0 && (
+          <details className="text-xs">
+          <summary className="cursor-pointer text-muted-foreground">
+            Detalles técnicos e historial ({lista.length})
+          </summary>
           <Table>
             <TableHeader>
               <TableRow>
