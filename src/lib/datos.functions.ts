@@ -748,7 +748,9 @@ export const listarDocumentosFactura = createServerFn({ method: "GET" })
  * privado: no existe ninguna URL pública ni permanente.
  */
 export const enlaceDocumento = createServerFn({ method: "POST" })
-  .inputValidator((data) => z.object({ id: z.string().uuid() }).parse(data))
+  .inputValidator((data) =>
+    z.object({ id: z.string().uuid(), descargar: z.boolean().optional() }).parse(data),
+  )
   .handler(async ({ data }) => {
     const admin = await adminAutorizado();
     const { data: doc, error } = await admin
@@ -759,7 +761,11 @@ export const enlaceDocumento = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const { data: firmado, error: errorFirma } = await admin.storage
       .from(BUCKET_DOCUMENTOS)
-      .createSignedUrl(doc.referencia_almacenamiento, 60);
+      .createSignedUrl(
+        doc.referencia_almacenamiento,
+        60,
+        data.descargar ? { download: doc.nombre_original } : undefined,
+      );
     if (errorFirma || !firmado) {
       throw new Error(errorFirma?.message ?? "No se pudo generar el enlace temporal");
     }
