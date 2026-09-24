@@ -7,8 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Lock, Menu, X } from "lucide-react";
 
 function Navegacion({ onNavegar }: { onNavegar?: () => void }) {
-  const ruta = useRouterState({ select: (s) => s.location.pathname });
-  const activo = moduloDeRuta(ruta);
+  const ubicacion = useRouterState({
+    select: (s) => ({ pathname: s.location.pathname, search: s.location.search }),
+  });
+  const contexto =
+    typeof ubicacion.search.desde === "string" ? ubicacion.search.desde : undefined;
+  const activo = moduloDeRuta(ubicacion.pathname, contexto);
   const [abierto, setAbierto] = useState(activo);
 
   useEffect(() => {
@@ -53,6 +57,11 @@ function Navegacion({ onNavegar }: { onNavegar?: () => void }) {
                       <li key={hijo.path}>
                         <Link
                           to={hijo.path}
+                          search={
+                            modulo.id === "configuracion" && hijo.path === "/cuentas"
+                              ? { desde: "configuracion" }
+                              : undefined
+                          }
                           onClick={onNavegar}
                           className="block rounded-md px-2 py-1.5 text-[0.82rem] text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
                           activeProps={{
@@ -76,6 +85,11 @@ function Navegacion({ onNavegar }: { onNavegar?: () => void }) {
                           <li key={hijo.path}>
                             <Link
                               to={hijo.path}
+                                search={
+                                  modulo.id === "configuracion" && hijo.path === "/compromisos"
+                                    ? { desde: "configuracion" }
+                                    : undefined
+                                }
                               onClick={onNavegar}
                               className="block rounded-md px-2 py-1.5 text-[0.82rem] text-sidebar-foreground/45 transition-colors hover:bg-sidebar-accent/40 hover:text-sidebar-accent-foreground"
                               activeProps={{

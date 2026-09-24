@@ -62,8 +62,10 @@ export const MODULOS: Modulo[] = [
     path: "/categorias",
     descripcion: "Maestros, trazabilidad y mantenimiento",
     hijos: [
+      { path: "/cuentas", label: "Cuentas bancarias", listo: true },
       { path: "/categorias", label: "Categorías", listo: true },
       { path: "/proveedores", label: "Proveedores", listo: true },
+      { path: "/compromisos", label: "Compromisos fijos", listo: false },
       { path: "/auditoria", label: "Auditoría", listo: true },
       { path: "/diagnostico", label: "Diagnóstico", listo: false },
       { path: "/backup", label: "Backup / Exportación", listo: false },
@@ -72,8 +74,12 @@ export const MODULOS: Modulo[] = [
   },
 ];
 
-export function moduloDeRuta(ruta: string) {
+export function moduloDeRuta(ruta: string, contexto?: string) {
   if (ruta === "/") return "inicio";
+  const moduloContextual = MODULOS.find(
+    (m) => m.id === contexto && m.hijos.some((h) => ruta === h.path || ruta.startsWith(`${h.path}/`)),
+  );
+  if (moduloContextual) return moduloContextual.id;
   const encontrado = MODULOS.find((m) =>
     m.hijos.some((h) => ruta === h.path || ruta.startsWith(`${h.path}/`)),
   );
